@@ -1208,7 +1208,6 @@ struct MainAppView: View {
     }
 }
 
-// MARK: - Sidebar
 struct SidebarView: View {
     @Binding var currentSection: ContentView.AppSection
     @Binding var selectedDestination: ContentView.Destination
@@ -1216,108 +1215,61 @@ struct SidebarView: View {
     @Binding var showingMenuBarInfo: Bool
     let currentDestinations: [ContentView.Destination]
     @EnvironmentObject var vault: VaultManager
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Picker("Section", selection: $currentSection) {
-                Text("Study").tag(ContentView.AppSection.study)
-                Text("Power User").tag(ContentView.AppSection.powerUser)
+        List(selection: $selectedDestination) {
+            Section {
+                Label("Study", systemImage: "books.vertical")
+                    .font(.system(size: DesignSystem.typeSmall()))
+                    .foregroundColor(vault.theme.textSecondary)
+            } header: {
+                Text("ROOMS")
+                    .font(.system(size: DesignSystem.typeCaption()))
+                    .foregroundColor(vault.theme.textSecondary)
             }
-            .pickerStyle(.segmented)
-            .padding(12)
-            
-            Divider().background(vault.theme.divider)
-            
-            HStack(spacing: 10) {
-                EnsoLogo()
-                Text("墨")
-                    .font(.system(size: 22, weight: .light, design: .serif))
-                    .foregroundColor(vault.theme.textPrimary)
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            
-            Divider().background(vault.theme.divider)
-            
-            VStack(spacing: 2) {
+
+            Section {
                 ForEach(currentDestinations) { destination in
-                    SidebarItem(
-                        icon: destination.icon,
-                        title: destination.rawValue,
-                        isSelected: selectedDestination == destination,
-                        action: { selectedDestination = destination }
-                    )
+                    Label(destination.rawValue, systemImage: destination.icon)
+                        .font(.system(size: DesignSystem.typeSmall()))
+                        .tag(destination)
                 }
+            } header: {
+                Text("VIEWS")
+                    .font(.system(size: DesignSystem.typeCaption()))
+                    .foregroundColor(vault.theme.textSecondary)
             }
-            .padding(.vertical, 12)
-            
-            Spacer()
-            
-            Divider().background(vault.theme.divider)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Today")
-                        .font(.system(size: 11))
+        }
+        .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                Divider().background(vault.theme.divider)
+                HStack(spacing: DesignSystem.spaceS()) {
+                    Text("\(todayMinutes)m today")
+                        .font(.system(size: DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                     Spacer()
-                    Text("\(todayMinutes)m")
-                        .font(.system(size: 11, weight: .medium, design: .serif))
-                        .foregroundColor(vault.theme.textPrimary)
-                }
-                
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(vault.theme.divider)
-                            .frame(height: 2)
-                        Rectangle()
-                            .fill(vault.theme.accent)
-                            .frame(width: geo.size.width * todayProgress, height: 2)
+                    Button(action: { showingQuickTimer = true }) {
+                        Label("Quick Timer", systemImage: "timer")
+                            .font(.system(size: DesignSystem.typeSmall()))
+                            .foregroundColor(vault.theme.textPrimary)
                     }
+                    .buttonStyle(.plain)
                 }
-                .frame(height: 2)
-                
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(vault.getStreak() > 0 ? vault.theme.seal : vault.theme.divider)
-                        .frame(width: 5, height: 5)
-                    Text("\(vault.getStreak())")
-                        .font(.system(size: 10))
-                        .foregroundColor(vault.theme.textSecondary)
-                }
-                .padding(.top, 4)
+                .padding(.horizontal, DesignSystem.spaceM())
+                .padding(.vertical, DesignSystem.spaceS())
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            
-            Button(action: { showingQuickTimer = true }) {
-                HStack {
-                    Image(systemName: "timer")
-                        .font(.system(size: 12))
-                    Text("Quick Timer")
-                        .font(.system(size: 13))
-                    Spacer()
-                }
-                .foregroundColor(vault.theme.textPrimary)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
-            }
-            .buttonStyle(.plain)
             .background(vault.theme.sidebar)
         }
-        .background(vault.theme.sidebar)
     }
-    
+
     var todayMinutes: Int {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let key = formatter.string(from: Date())
         return vault.dailyStats[key]?.totalMinutes ?? 0
     }
-    
+
     var todayProgress: Double {
         min(Double(todayMinutes) / Double(vault.settings.dailyGoal), 1.0)
     }
