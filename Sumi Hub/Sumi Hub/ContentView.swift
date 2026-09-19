@@ -94,57 +94,57 @@ enum AppTheme: String, Codable, CaseIterable {
         switch self {
         case .light:
             return ThemeColors(
-                background: Color(red: 0.97, green: 0.95, blue: 0.91),
-                sidebar: Color(red: 0.94, green: 0.91, blue: 0.87),
-                card: Color(red: 0.96, green: 0.92, blue: 0.85),
-                textPrimary: Color(red: 0.18, green: 0.17, blue: 0.20),
-                textSecondary: Color(red: 0.45, green: 0.42, blue: 0.47),
-                accent: Color(red: 0.52, green: 0.60, blue: 0.50),
-                seal: Color(red: 0.78, green: 0.30, blue: 0.25),
-                divider: Color(red: 0.88, green: 0.85, blue: 0.80),
-                warm: Color(red: 0.96, green: 0.92, blue: 0.85),
-                buttonBackground: Color(red: 0.25, green: 0.24, blue: 0.27),
-                buttonText: Color(red: 0.98, green: 0.97, blue: 0.95)
+                background: Color(red: 0.980, green: 0.980, blue: 0.975),
+                sidebar: Color(red: 0.955, green: 0.955, blue: 0.945),
+                card: Color.white,
+                textPrimary: Color(red: 0.150, green: 0.150, blue: 0.170),
+                textSecondary: Color(red: 0.530, green: 0.530, blue: 0.560),
+                accent: Color(red: 0.360, green: 0.500, blue: 0.420),
+                seal: Color(red: 0.800, green: 0.340, blue: 0.300),
+                divider: Color(red: 0.910, green: 0.910, blue: 0.900),
+                warm: Color(red: 0.955, green: 0.955, blue: 0.950),
+                buttonBackground: Color(red: 0.180, green: 0.190, blue: 0.210),
+                buttonText: Color(red: 0.970, green: 0.970, blue: 0.960)
             )
         case .dark:
             return ThemeColors(
-                background: Color(red: 0.12, green: 0.11, blue: 0.14),
-                sidebar: Color(red: 0.15, green: 0.14, blue: 0.17),
-                card: Color(red: 0.18, green: 0.17, blue: 0.20),
-                textPrimary: Color(red: 0.95, green: 0.94, blue: 0.92),
-                textSecondary: Color(red: 0.75, green: 0.72, blue: 0.70),
-                accent: Color(red: 0.52, green: 0.60, blue: 0.50),
-                seal: Color(red: 0.85, green: 0.40, blue: 0.35),
-                divider: Color(red: 0.25, green: 0.24, blue: 0.27),
-                warm: Color(red: 0.22, green: 0.20, blue: 0.18),
-                buttonBackground: Color(red: 0.52, green: 0.60, blue: 0.50),
-                buttonText: Color(red: 0.98, green: 0.97, blue: 0.95)
+                background: Color(red: 0.090, green: 0.100, blue: 0.110),
+                sidebar: Color(red: 0.120, green: 0.130, blue: 0.140),
+                card: Color(red: 0.130, green: 0.140, blue: 0.160),
+                textPrimary: Color(red: 0.930, green: 0.930, blue: 0.920),
+                textSecondary: Color(red: 0.620, green: 0.630, blue: 0.660),
+                accent: Color(red: 0.580, green: 0.720, blue: 0.620),
+                seal: Color(red: 0.880, green: 0.440, blue: 0.380),
+                divider: Color(red: 0.240, green: 0.250, blue: 0.270),
+                warm: Color(red: 0.170, green: 0.180, blue: 0.200),
+                buttonBackground: Color(red: 0.900, green: 0.900, blue: 0.920),
+                buttonText: Color(red: 0.120, green: 0.120, blue: 0.140)
             )
         case .sepia:
             return ThemeColors(
-                background: Color(red: 0.94, green: 0.90, blue: 0.82),
-                sidebar: Color(red: 0.91, green: 0.86, blue: 0.76),
-                card: Color(red: 0.96, green: 0.92, blue: 0.85),
-                textPrimary: Color(red: 0.35, green: 0.28, blue: 0.22),
-                textSecondary: Color(red: 0.55, green: 0.48, blue: 0.42),
-                accent: Color(red: 0.48, green: 0.52, blue: 0.42),
-                seal: Color(red: 0.68, green: 0.35, blue: 0.28),
-                divider: Color(red: 0.85, green: 0.80, blue: 0.72),
-                warm: Color(red: 0.96, green: 0.90, blue: 0.80),
-                buttonBackground: Color(red: 0.45, green: 0.38, blue: 0.32),
-                buttonText: Color(red: 0.98, green: 0.96, blue: 0.92)
+                background: Color(red: 0.960, green: 0.950, blue: 0.910),
+                sidebar: Color(red: 0.935, green: 0.925, blue: 0.885),
+                card: Color(red: 0.980, green: 0.975, blue: 0.950),
+                textPrimary: Color(red: 0.300, green: 0.280, blue: 0.240),
+                textSecondary: Color(red: 0.550, green: 0.530, blue: 0.470),
+                accent: Color(red: 0.420, green: 0.500, blue: 0.380),
+                seal: Color(red: 0.720, green: 0.340, blue: 0.270),
+                divider: Color(red: 0.870, green: 0.860, blue: 0.810),
+                warm: Color(red: 0.950, green: 0.930, blue: 0.880),
+                buttonBackground: Color(red: 0.320, green: 0.310, blue: 0.280),
+                buttonText: Color(red: 0.970, green: 0.960, blue: 0.930)
             )
         case .highContrast:
             return ThemeColors(
                 background: Color.white,
-                sidebar: Color(red: 0.95, green: 0.95, blue: 0.95),
-                card: Color(red: 0.98, green: 0.98, blue: 0.98),
+                sidebar: Color(red: 0.950, green: 0.950, blue: 0.950),
+                card: Color(red: 0.990, green: 0.990, blue: 0.990),
                 textPrimary: Color.black,
-                textSecondary: Color(red: 0.40, green: 0.40, blue: 0.40),
-                accent: Color(red: 0.00, green: 0.50, blue: 0.00),
-                seal: Color(red: 0.80, green: 0.00, blue: 0.00),
-                divider: Color(red: 0.80, green: 0.80, blue: 0.80),
-                warm: Color(red: 0.98, green: 0.95, blue: 0.90),
+                textSecondary: Color(red: 0.350, green: 0.350, blue: 0.350),
+                accent: Color(red: 0.000, green: 0.450, blue: 0.000),
+                seal: Color(red: 0.800, green: 0.000, blue: 0.000),
+                divider: Color(red: 0.780, green: 0.780, blue: 0.780),
+                warm: Color(red: 0.950, green: 0.950, blue: 0.920),
                 buttonBackground: Color.black,
                 buttonText: Color.white
             )
@@ -183,7 +183,7 @@ struct DesignSystem {
     static func dividerOpacity() -> Double { 0.06 }
 
     // Zen corner languages: calm cards, tighter controls, smallest chips.
-    static func radiusCard() -> CGFloat { 12 }
+    static func radiusCard() -> CGFloat { 8 }
     static func radiusControl() -> CGFloat { 7 }
     static func radiusChip() -> CGFloat { 6 }
     static func radiusSidebar() -> CGFloat { 10 }
@@ -204,13 +204,66 @@ struct DesignSystem {
     static func shadowRadius() -> CGFloat { 10 }
     static func shadowOffsetY() -> CGFloat { 2 }
 
-    // Type scale (tuned, rounded numerals for the zen/data set).
+    // Type scale (tuned, system-sans; numerals stay monospaced at usage).
+    static func typeDisplay() -> CGFloat { 64 }
     static func typeHero() -> CGFloat { 30 }
-    static func typeTitle() -> CGFloat { 20 }
+    static func typeTitle() -> CGFloat { 22 }
     static func typeSection() -> CGFloat { 15 }
     static func typeBody() -> CGFloat { 13 }
-    static func typeSmall() -> CGFloat { 11 }
-    static func typeCaption() -> CGFloat { 9 }
+    static func typeSmall() -> CGFloat { 12 }
+    static func typeCaption() -> CGFloat { 11 }
+}
+
+// MARK: - Materials Kit (minimal surfaces)
+// Shared primitives so rooms stop hand-rolling background/cornerRadius/shadow.
+// One caller: every card/panel goes through surface(theme:) — card fill +
+// hairline stroke + soft shadow + radius from the tokens below, so depth reads as
+// one system instead of ad-hoc boxes.
+
+struct PanelSurface: ViewModifier {
+    let theme: ThemeColors
+    func body(content: Content) -> some View {
+        content
+            .padding(DesignSystem.spaceM())
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
+                    .fill(theme.card)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
+                    .stroke(theme.divider, lineWidth: 1)
+            )
+            .shadow(
+                color: theme.ink.opacity(DesignSystem.shadowColorOpacity()),
+                radius: DesignSystem.shadowRadius(),
+                x: 0,
+                y: DesignSystem.shadowOffsetY()
+            )
+    }
+}
+
+extension View {
+    /// Minimal layered card: card fill + hairline stroke + soft shadow.
+    func surface(_ theme: ThemeColors) -> some View {
+        modifier(PanelSurface(theme: theme))
+    }
+}
+
+struct PillButtonStyle: ButtonStyle {
+    let theme: ThemeColors
+    let prominent: Bool
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: DesignSystem.typeBody(), weight: .medium))
+            .foregroundColor(prominent ? theme.buttonText : theme.textPrimary)
+            .padding(.horizontal, DesignSystem.spaceL())
+            .frame(height: 34)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radiusControl())
+                    .fill(prominent ? theme.buttonBackground : theme.sidebar)
+            )
+            .opacity(configuration.isPressed ? 0.85 : 1)
+    }
 }
 
 
@@ -991,19 +1044,25 @@ struct ZenSegmentedPicker: View {
                     }
                 } label: {
                     Text(option.1)
-                        .font(.system(size: 13, weight: selection == option.0 ? .medium : .regular))
+                        .font(.system(size: DesignSystem.typeBody(), weight: selection == option.0 ? .medium : .regular))
                         .foregroundColor(selection == option.0 ? vault.theme.textPrimary : vault.theme.textSecondary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(selection == option.0 ? vault.theme.warm : Color.clear)
-                        .cornerRadius(6)
+                        .frame(height: 28)
+                        .background(
+                            RoundedRectangle(cornerRadius: DesignSystem.radiusChip())
+                                .fill(selection == option.0 ? vault.theme.card : Color.clear)
+                        )
+                        .shadow(color: vault.theme.ink.opacity(selection == option.0 ? DesignSystem.shadowColorOpacity() : 0),
+                                radius: DesignSystem.shadowRadius() * 0.6,
+                                x: 0,
+                                y: 1)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(4)
+        .padding(DesignSystem.spaceXS())
         .background(vault.theme.sidebar)
-        .cornerRadius(8)
+        .cornerRadius(DesignSystem.radiusControl())
     }
 }
 
@@ -1302,23 +1361,22 @@ struct SidebarItem: View {
     }
 }
 
-// MARK: - Focus Hero Portrait (Pass 3 — calm zen hero tile)
-// The single warm surface in the Focus room: today's minutes as tuned serif
-// hero, hairline ink card, soft rice-paper fill. Sister rhythm to the toolbar
-// chip — hero on cream, chip on ink. Pure display, zero state.
+// MARK: - Focus Hero Portrait (minimal surface)
+// The single warm surface in the Focus room: today's minutes as a system-sans
+// stat, white card, hairline stroke, soft shadow. Pure display, zero state.
 struct FocusHeroTile: View {
     @EnvironmentObject var vault: VaultManager
-    @EnvironmentObject var timerManager: TimerManager
 
     var body: some View {
         HStack(alignment: .lastTextBaseline, spacing: DesignSystem.spaceM()) {
-            VStack(alignment: .leading, spacing: DesignSystem.spaceXS()) {
-                Text("Today")
-                    .font(.system(size: DesignSystem.typeCaption()))
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Today".uppercased())
+                    .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                    .kerning(0.6)
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(todayMinutes)")
-                        .font(.system(size: DesignSystem.typeHero(), weight: .light, design: .serif))
+                        .font(.system(size: DesignSystem.typeHero(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
                     Text("min")
@@ -1326,19 +1384,20 @@ struct FocusHeroTile: View {
                         .foregroundColor(vault.theme.textSecondary)
                 }
                 Text("of \(vault.settings.dailyGoal) min goal")
-                    .font(.system(size: DesignSystem.typeCaption()))
+                    .font(.system(size: DesignSystem.typeSmall()))
                     .foregroundColor(vault.theme.textSecondary)
             }
 
             Spacer(minLength: DesignSystem.spaceM())
 
-            VStack(alignment: .trailing, spacing: DesignSystem.spaceXS()) {
-                Text("Streak")
-                    .font(.system(size: DesignSystem.typeCaption()))
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("Streak".uppercased())
+                    .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                    .kerning(0.6)
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(vault.getStreak())")
-                        .font(.system(size: DesignSystem.typeBody(), weight: .medium, design: .serif))
+                        .font(.system(size: DesignSystem.typeTitle(), weight: .semibold))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.accent)
                     Text("days")
@@ -1347,20 +1406,8 @@ struct FocusHeroTile: View {
                 }
             }
         }
-        .padding(DesignSystem.spaceM())
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
-                .fill(vault.theme.background)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
-                .stroke(vault.theme.divider, lineWidth: 1)
-        )
-        .shadow(color: vault.theme.ink.opacity(DesignSystem.shadowColorOpacity()),
-                radius: DesignSystem.shadowRadius(),
-                x: 0,
-                y: DesignSystem.shadowOffsetY())
+        .surface(vault.theme)
     }
 
     var todayMinutes: Int {
@@ -1380,108 +1427,114 @@ struct FocusRoomView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 40) {
+            VStack(spacing: 24) {
                 FocusHeroTile()
-                    .padding(.horizontal, 60)
-                    .padding(.top, 40)
 
                 TimerDisplayView()
-                    .frame(maxWidth: 500)
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
+
+                VStack(alignment: .leading, spacing: DesignSystem.spaceS()) {
+                    HStack(spacing: DesignSystem.spaceS()) {
                         Text("Focus Goals")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: DesignSystem.typeSection(), weight: .medium))
                             .foregroundColor(vault.theme.textPrimary)
                         Spacer()
                         Button(action: { showingAddGoal = true }) {
                             Image(systemName: "plus")
-                                .font(.system(size: 12))
+                                .font(.system(size: DesignSystem.typeBody(), weight: .semibold))
                                 .foregroundColor(vault.theme.textSecondary)
+                                .frame(width: 28, height: 28)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .help("Add focus goal")
                     }
-                    
+
                     if timerManager.focusGoals.isEmpty {
                         Text("No goals set. Click + to add one.")
-                            .font(.system(size: 12))
+                            .font(.system(size: DesignSystem.typeSmall()))
                             .foregroundColor(vault.theme.textSecondary)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 6)
                     } else {
                         ForEach(timerManager.focusGoals) { goal in
-                            HStack {
-                                Button(action: { timerManager.toggleGoal(goal) }) {
+                            HStack(spacing: DesignSystem.spaceS()) {
+                                Button { timerManager.toggleGoal(goal) } label: {
                                     Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .font(.system(size: 16))
+                                        .font(.system(size: DesignSystem.typeBody()))
                                         .foregroundColor(goal.isCompleted ? vault.theme.accent : vault.theme.divider)
+                                        .frame(width: 24, height: 24)
+                                        .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
-                                
+                                .help(goal.isCompleted ? "Mark as not done" : "Mark as done")
+
                                 Text(goal.title)
+                                    .font(.system(size: DesignSystem.typeBody()))
                                     .strikethrough(goal.isCompleted)
                                     .foregroundColor(goal.isCompleted ? vault.theme.textSecondary : vault.theme.textPrimary)
-                                
+
                                 Spacer()
-                                
-                                Button(action: { timerManager.removeGoal(goal) }) {
+
+                                Button { timerManager.removeGoal(goal) } label: {
                                     Image(systemName: "xmark")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(vault.theme.seal.opacity(0.6))
+                                        .font(.system(size: DesignSystem.typeSmall()))
+                                        .foregroundColor(vault.theme.textSecondary.opacity(0.6))
+                                        .frame(width: 24, height: 24)
+                                        .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+                                .help("Remove goal")
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 2)
                         }
                     }
                 }
-                .padding(.horizontal, 60)
-                
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .surface(vault.theme)
+
                 if vault.settings.showQuotes, let quote = timerManager.currentQuote {
-                    VStack(spacing: 8) {
-                        Text("—")
-                            .font(.system(size: 20, weight: .light))
-                            .foregroundColor(vault.theme.divider)
+                    VStack(spacing: 6) {
                         Text("\"\(quote.text)\"")
-                            .font(.system(size: 14, design: .serif))
+                            .font(.system(size: DesignSystem.typeSection()))
                             .italic()
                             .foregroundColor(vault.theme.textSecondary)
                             .multilineTextAlignment(.center)
-                        Text("— \(quote.author)")
-                            .font(.system(size: 11))
-                            .foregroundColor(vault.theme.textSecondary.opacity(0.6))
+                        Text(quote.author.uppercased())
+                            .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                            .kerning(0.6)
+                            .foregroundColor(vault.theme.textSecondary.opacity(0.7))
                     }
-                    .padding(.horizontal, 60)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, DesignSystem.spaceS())
                     .animation(.easeInOut(duration: 0.5), value: quote.id)
                 }
-                
+
                 if !timerManager.isRunning && timerManager.breakSuggestion.isEmpty == false {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Smart Break Suggestion")
-                            .font(.system(size: 11))
+                    VStack(alignment: .leading, spacing: DesignSystem.spaceXS()) {
+                        Text("Smart Break Suggestion".uppercased())
+                            .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                            .kerning(0.6)
                             .foregroundColor(vault.theme.textSecondary)
                         Text(timerManager.breakSuggestion)
-                            .font(.system(size: 13))
+                            .font(.system(size: DesignSystem.typeBody()))
                             .foregroundColor(vault.theme.textPrimary)
-                            .padding(12)
-                            .background(vault.theme.warm)
-                            .cornerRadius(6)
                     }
-                    .padding(.horizontal, 60)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(DesignSystem.spaceM())
+                    .background(
+                        RoundedRectangle(cornerRadius: DesignSystem.radiusControl())
+                            .fill(vault.theme.warm)
+                    )
                 }
-                
-                Spacer(minLength: 60)
+
+                Spacer(minLength: 40)
             }
+            .frame(maxWidth: 600)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 32)
         }
         .sheet(isPresented: $showingAddGoal) {
             AddGoalSheet(title: $newGoalTitle, timerManager: timerManager)
         }
-    }
-    
-    var todayMinutes: Int {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let key = formatter.string(from: Date())
-        return vault.dailyStats[key]?.totalMinutes ?? 0
     }
 }
 
@@ -1489,11 +1542,13 @@ struct AddGoalSheet: View {
     @Binding var title: String
     @ObservedObject var timerManager: TimerManager
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var vault: VaultManager
     
     var body: some View {
         VStack(spacing: 20) {
             Text("Add Focus Goal")
-                .font(.system(size: 18, weight: .light, design: .serif))
+                .font(.system(size: DesignSystem.typeTitle(), weight: .semibold))
+                .foregroundColor(vault.theme.textPrimary)
             
             TextField("Goal title", text: $title)
                 .textFieldStyle(.roundedBorder)
@@ -1523,74 +1578,54 @@ struct TimerDisplayView: View {
     @EnvironmentObject var vault: VaultManager
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             ZenSegmentedPicker(
                 selection: $timerManager.mode,
                 options: [(.pomodoro, "Pomodoro"), (.flow, "Flow")]
             )
-            .frame(width: 260)
-            
+            .frame(width: 240)
+
             ZStack {
                 Circle()
                     .stroke(vault.theme.divider, lineWidth: 1)
-                    .frame(width: 300, height: 300)
-                
+                    .frame(width: 280, height: 280)
+
                 Circle()
                     .trim(from: 0, to: timerManager.progress)
-                    .stroke(vault.theme.accent, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                    .frame(width: 300, height: 300)
+                    .stroke(vault.theme.accent, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .frame(width: 280, height: 280)
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: timerManager.progress)
-                
-                VStack(spacing: 16) {
+
+                VStack(spacing: 10) {
                     Text(timerManager.formattedTime)
-                        .font(.system(size: 72, weight: .light, design: .serif))
+                        .font(.system(size: DesignSystem.typeDisplay(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
-                    
+
                     Text(timerManager.statusText)
-                        .font(.system(size: 13, design: .serif))
+                        .font(.system(size: DesignSystem.typeSmall()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
             }
-            
+
             AmbienceSelector()
-            
-            HStack(spacing: 20) {
-                Button(action: { timerManager.toggle() }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: timerManager.isRunning ? "pause" : "play.fill")
-                            .font(.system(size: 12))
-                        Text(timerManager.isRunning ? "Pause" : "Begin")
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                    .foregroundColor(vault.theme.buttonText)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 14)
-                    .background(vault.theme.buttonBackground)
-                    .cornerRadius(6)
+
+            HStack(spacing: 12) {
+                Button { timerManager.toggle() } label: {
+                    Label(timerManager.isRunning ? "Pause" : "Begin",
+                          systemImage: timerManager.isRunning ? "pause.fill" : "play.fill")
                 }
-                .buttonStyle(.plain)
-                
-                Button(action: { timerManager.reset() }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 12))
-                        Text("Reset")
-                            .font(.system(size: 13))
-                    }
-                    .foregroundColor(vault.theme.textPrimary)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 14)
-                    .background(vault.theme.sidebar)
-                    .cornerRadius(6)
+                .buttonStyle(PillButtonStyle(theme: vault.theme, prominent: true))
+
+                Button { timerManager.reset() } label: {
+                    Label("Reset", systemImage: "arrow.counterclockwise")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PillButtonStyle(theme: vault.theme, prominent: false))
             }
         }
-        .padding(48)
-        .background(vault.theme.card)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(vault.theme.divider, lineWidth: 1))
+        .padding(32)
+        .surface(vault.theme)
     }
 }
 
@@ -1600,12 +1635,13 @@ struct AmbienceSelector: View {
     let ambiances = ["None", "Rain", "Fireplace", "White Noise", "Deep Focus"]
     
     var body: some View {
-        VStack(spacing: 8) {
-            Text("Ambience")
-                .font(.system(size: 11))
+        VStack(spacing: 10) {
+            Text("Ambience".uppercased())
+                .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                .kerning(0.6)
                 .foregroundColor(vault.theme.textSecondary)
             
-            HStack(spacing: 8) {
+            HStack(spacing: 4) {
                 ForEach(ambiances, id: \.self) { amb in
                     Button {
                         vault.settings.ambience = amb.lowercased()
@@ -1616,25 +1652,32 @@ struct AmbienceSelector: View {
                         vault.saveAllData()
                     } label: {
                         Text(amb)
-                            .font(.system(size: 11))
+                            .font(.system(size: DesignSystem.typeSmall(), weight: vault.settings.ambience == amb.lowercased() ? .medium : .regular))
                             .foregroundColor(vault.settings.ambience == amb.lowercased() ? vault.theme.buttonText : vault.theme.textSecondary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(vault.settings.ambience == amb.lowercased() ? vault.theme.buttonBackground : Color.clear)
-                            .cornerRadius(4)
+                            .padding(.horizontal, DesignSystem.spaceS())
+                            .frame(height: 26)
+                            .background(
+                                RoundedRectangle(cornerRadius: DesignSystem.radiusChip())
+                                    .fill(vault.settings.ambience == amb.lowercased() ? vault.theme.buttonBackground : Color.clear)
+                            )
                     }
                     .buttonStyle(.plain)
                 }
             }
+            .padding(4)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radiusControl())
+                    .fill(vault.theme.sidebar)
+            )
             
             if vault.settings.ambience != "none" {
-                HStack {
+                HStack(spacing: 8) {
                     Image(systemName: "speaker.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                     Slider(value: $vault.settings.ambienceVolume, in: 0...1)
                         .tint(vault.theme.accent)
-                        .frame(width: 120)
+                        .frame(width: 140)
                         .onChange(of: vault.settings.ambienceVolume) { _, newValue in
                             vault.audioPlayerManager.setVolume(Float(newValue))
                         }
