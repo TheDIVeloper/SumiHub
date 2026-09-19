@@ -94,59 +94,59 @@ enum AppTheme: String, Codable, CaseIterable {
         switch self {
         case .light:
             return ThemeColors(
-                background: Color(red: 0.980, green: 0.980, blue: 0.975),
-                sidebar: Color(red: 0.955, green: 0.955, blue: 0.945),
-                card: Color.white,
-                textPrimary: Color(red: 0.150, green: 0.150, blue: 0.170),
-                textSecondary: Color(red: 0.530, green: 0.530, blue: 0.560),
-                accent: Color(red: 0.360, green: 0.500, blue: 0.420),
-                seal: Color(red: 0.800, green: 0.340, blue: 0.300),
-                divider: Color(red: 0.910, green: 0.910, blue: 0.900),
-                warm: Color(red: 0.955, green: 0.955, blue: 0.950),
-                buttonBackground: Color(red: 0.180, green: 0.190, blue: 0.210),
-                buttonText: Color(red: 0.970, green: 0.970, blue: 0.960)
+                background: Color(red: 0.933, green: 0.902, blue: 0.867),
+                sidebar: Color(red: 0.902, green: 0.859, blue: 0.820),
+                card: Color(red: 0.863, green: 0.827, blue: 0.796),
+                textPrimary: Color(red: 0.341, green: 0.322, blue: 0.475),
+                textSecondary: Color(red: 0.380, green: 0.361, blue: 0.518),
+                accent: Color(red: 0.533, green: 0.373, blue: 0.306),
+                seal: Color(red: 0.839, green: 0.506, blue: 0.490),
+                divider: Color(red: 0.867, green: 0.816, blue: 0.776),
+                warm: Color(red: 0.916, green: 0.831, blue: 0.799),
+                buttonBackground: Color(red: 0.533, green: 0.373, blue: 0.306),
+                buttonText: Color(red: 0.976, green: 0.961, blue: 0.941)
             )
         case .dark:
             return ThemeColors(
-                background: Color(red: 0.090, green: 0.100, blue: 0.110),
-                sidebar: Color(red: 0.120, green: 0.130, blue: 0.140),
-                card: Color(red: 0.130, green: 0.140, blue: 0.160),
-                textPrimary: Color(red: 0.930, green: 0.930, blue: 0.920),
-                textSecondary: Color(red: 0.620, green: 0.630, blue: 0.660),
-                accent: Color(red: 0.580, green: 0.720, blue: 0.620),
-                seal: Color(red: 0.880, green: 0.440, blue: 0.380),
-                divider: Color(red: 0.240, green: 0.250, blue: 0.270),
-                warm: Color(red: 0.170, green: 0.180, blue: 0.200),
-                buttonBackground: Color(red: 0.900, green: 0.900, blue: 0.920),
-                buttonText: Color(red: 0.120, green: 0.120, blue: 0.140)
+                background: Color(red: 0.118, green: 0.118, blue: 0.180),
+                sidebar: Color(red: 0.094, green: 0.094, blue: 0.145),
+                card: Color(red: 0.192, green: 0.196, blue: 0.267),
+                textPrimary: Color(red: 0.776, green: 0.816, blue: 0.961),
+                textSecondary: Color(red: 0.702, green: 0.737, blue: 0.875),
+                accent: Color(red: 0.533, green: 0.373, blue: 0.306),
+                seal: Color(red: 0.839, green: 0.506, blue: 0.490),
+                divider: Color(red: 0.263, green: 0.275, blue: 0.353),
+                warm: Color(red: 0.247, green: 0.187, blue: 0.236),
+                buttonBackground: Color(red: 0.533, green: 0.373, blue: 0.306),
+                buttonText: Color(red: 0.933, green: 0.902, blue: 0.867)
             )
         case .sepia:
             return ThemeColors(
-                background: Color(red: 0.960, green: 0.950, blue: 0.910),
-                sidebar: Color(red: 0.935, green: 0.925, blue: 0.885),
-                card: Color(red: 0.980, green: 0.975, blue: 0.950),
-                textPrimary: Color(red: 0.300, green: 0.280, blue: 0.240),
-                textSecondary: Color(red: 0.550, green: 0.530, blue: 0.470),
-                accent: Color(red: 0.420, green: 0.500, blue: 0.380),
-                seal: Color(red: 0.720, green: 0.340, blue: 0.270),
-                divider: Color(red: 0.870, green: 0.860, blue: 0.810),
-                warm: Color(red: 0.950, green: 0.930, blue: 0.880),
-                buttonBackground: Color(red: 0.320, green: 0.310, blue: 0.280),
-                buttonText: Color(red: 0.970, green: 0.960, blue: 0.930)
+                background: Color(red: 0.906, green: 0.871, blue: 0.820),
+                sidebar: Color(red: 0.871, green: 0.820, blue: 0.753),
+                card: Color(red: 0.835, green: 0.776, blue: 0.686),
+                textPrimary: Color(red: 0.353, green: 0.337, blue: 0.439),
+                textSecondary: Color(red: 0.408, green: 0.384, blue: 0.463),
+                accent: Color(red: 0.478, green: 0.318, blue: 0.263),
+                seal: Color(red: 0.816, green: 0.478, blue: 0.459),
+                divider: Color(red: 0.827, green: 0.769, blue: 0.698),
+                warm: Color(red: 0.894, green: 0.805, blue: 0.760),
+                buttonBackground: Color(red: 0.478, green: 0.318, blue: 0.263),
+                buttonText: Color(red: 0.949, green: 0.937, blue: 0.918)
             )
         case .highContrast:
             return ThemeColors(
-                background: Color.white,
-                sidebar: Color(red: 0.950, green: 0.950, blue: 0.950),
-                card: Color(red: 0.990, green: 0.990, blue: 0.990),
-                textPrimary: Color.black,
-                textSecondary: Color(red: 0.350, green: 0.350, blue: 0.350),
-                accent: Color(red: 0.000, green: 0.450, blue: 0.000),
-                seal: Color(red: 0.800, green: 0.000, blue: 0.000),
-                divider: Color(red: 0.780, green: 0.780, blue: 0.780),
-                warm: Color(red: 0.950, green: 0.950, blue: 0.920),
-                buttonBackground: Color.black,
-                buttonText: Color.white
+                background: Color(red: 0.980, green: 0.969, blue: 0.949),
+                sidebar: Color(red: 0.925, green: 0.894, blue: 0.855),
+                card: Color(red: 0.996, green: 0.992, blue: 0.984),
+                textPrimary: Color(red: 0.118, green: 0.098, blue: 0.180),
+                textSecondary: Color(red: 0.294, green: 0.275, blue: 0.380),
+                accent: Color(red: 0.427, green: 0.286, blue: 0.224),
+                seal: Color(red: 0.741, green: 0.380, blue: 0.353),
+                divider: Color(red: 0.761, green: 0.714, blue: 0.663),
+                warm: Color(red: 0.941, green: 0.886, blue: 0.867),
+                buttonBackground: Color(red: 0.255, green: 0.180, blue: 0.145),
+                buttonText: Color(red: 0.992, green: 0.988, blue: 0.976)
             )
         }
     }
@@ -204,7 +204,7 @@ struct DesignSystem {
     static func shadowRadius() -> CGFloat { 10 }
     static func shadowOffsetY() -> CGFloat { 2 }
 
-    // Type scale (tuned, system-sans; numerals stay monospaced at usage).
+    // Type scale (Atkinson Hyperlegible Next — the vault's own typeface).
     static func typeDisplay() -> CGFloat { 64 }
     static func typeHero() -> CGFloat { 30 }
     static func typeTitle() -> CGFloat { 22 }
@@ -212,6 +212,30 @@ struct DesignSystem {
     static func typeBody() -> CGFloat { 13 }
     static func typeSmall() -> CGFloat { 12 }
     static func typeCaption() -> CGFloat { 11 }
+
+    // Typeface — Atkinson Hyperlegible Next, installed system-wide (same font
+    // the Obsidian vault uses). PostScript-name per weight; unknown weights
+    // fall back to Regular rather than trapping.
+    static func font(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        let name: String
+        switch weight {
+        case .ultraLight, .thin:
+            name = "AtkinsonHyperlegibleNext-ExtraLight"
+        case .light:
+            name = "AtkinsonHyperlegibleNext-Light"
+        case .medium:
+            name = "AtkinsonHyperlegibleNext-Medium"
+        case .semibold:
+            name = "AtkinsonHyperlegibleNext-SemiBold"
+        case .bold:
+            name = "AtkinsonHyperlegibleNext-Bold"
+        case .heavy, .black:
+            name = "AtkinsonHyperlegibleNext-ExtraBold"
+        default:
+            name = "AtkinsonHyperlegibleNext-Regular"
+        }
+        return Font.custom(name, size: size)
+    }
 }
 
 // MARK: - Materials Kit (minimal surfaces)
@@ -254,7 +278,7 @@ struct PillButtonStyle: ButtonStyle {
     let prominent: Bool
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: DesignSystem.typeBody(), weight: .medium))
+            .font(DesignSystem.font(DesignSystem.typeBody(), weight: .medium))
             .foregroundColor(prominent ? theme.buttonText : theme.textPrimary)
             .padding(.horizontal, DesignSystem.spaceL())
             .frame(height: 34)
@@ -1044,7 +1068,7 @@ struct ZenSegmentedPicker: View {
                     }
                 } label: {
                     Text(option.1)
-                        .font(.system(size: DesignSystem.typeBody(), weight: selection == option.0 ? .medium : .regular))
+                        .font(DesignSystem.font(DesignSystem.typeBody(), weight: selection == option.0 ? .medium : .regular))
                         .foregroundColor(selection == option.0 ? vault.theme.textPrimary : vault.theme.textSecondary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 28)
@@ -1190,7 +1214,7 @@ struct MainAppView: View {
                         
                         if showingMenuBarInfo {
                             Text("Menu Bar Active")
-                                .font(.system(size: 11))
+                                .font(DesignSystem.font(11))
                                 .foregroundColor(vault.theme.textSecondary)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
@@ -1201,9 +1225,9 @@ struct MainAppView: View {
                         Button(action: { withAnimation(.easeInOut) { zenMode.toggle() } }) {
                             HStack(spacing: 6) {
                                 Image(systemName: zenMode ? "eye.slash" : "eye")
-                                    .font(.system(size: 12))
+                                    .font(DesignSystem.font(12))
                                 Text(zenMode ? "Zen" : "Normal")
-                                    .font(.system(size: 12))
+                                    .font(DesignSystem.font(12))
                             }
                             .foregroundColor(vault.theme.textSecondary)
                             .padding(.horizontal, 12)
@@ -1279,23 +1303,23 @@ struct SidebarView: View {
         List(selection: $selectedDestination) {
             Section {
                 Label("Study", systemImage: "books.vertical")
-                    .font(.system(size: DesignSystem.typeSmall()))
+                    .font(DesignSystem.font(DesignSystem.typeSmall()))
                     .foregroundColor(vault.theme.textSecondary)
             } header: {
                 Text("ROOMS")
-                    .font(.system(size: DesignSystem.typeCaption()))
+                    .font(DesignSystem.font(DesignSystem.typeCaption()))
                     .foregroundColor(vault.theme.textSecondary)
             }
 
             Section {
                 ForEach(currentDestinations) { destination in
                     Label(destination.rawValue, systemImage: destination.icon)
-                        .font(.system(size: DesignSystem.typeSmall()))
+                        .font(DesignSystem.font(DesignSystem.typeSmall()))
                         .tag(destination)
                 }
             } header: {
                 Text("VIEWS")
-                    .font(.system(size: DesignSystem.typeCaption()))
+                    .font(DesignSystem.font(DesignSystem.typeCaption()))
                     .foregroundColor(vault.theme.textSecondary)
             }
         }
@@ -1305,12 +1329,12 @@ struct SidebarView: View {
                 Divider().background(vault.theme.divider)
                 HStack(spacing: DesignSystem.spaceS()) {
                     Text("\(todayMinutes)m today")
-                        .font(.system(size: DesignSystem.typeCaption()))
+                        .font(DesignSystem.font(DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                     Spacer()
                     Button(action: { showingQuickTimer = true }) {
                         Label("Quick Timer", systemImage: "timer")
-                            .font(.system(size: DesignSystem.typeSmall()))
+                            .font(DesignSystem.font(DesignSystem.typeSmall()))
                             .foregroundColor(vault.theme.textPrimary)
                     }
                     .buttonStyle(.plain)
@@ -1345,10 +1369,10 @@ struct SidebarItem: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
+                    .font(DesignSystem.font(14))
                     .frame(width: 20)
                 Text(title)
-                    .font(.system(size: 13, weight: isSelected ? .medium : .regular))
+                    .font(DesignSystem.font(13, weight: isSelected ? .medium : .regular))
                 Spacer()
             }
             .foregroundColor(isSelected ? vault.theme.textPrimary : vault.theme.textSecondary)
@@ -1371,20 +1395,20 @@ struct FocusHeroTile: View {
         HStack(alignment: .lastTextBaseline, spacing: DesignSystem.spaceM()) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Today".uppercased())
-                    .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                    .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
                     .kerning(0.6)
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(todayMinutes)")
-                        .font(.system(size: DesignSystem.typeHero(), weight: .medium))
+                        .font(DesignSystem.font(DesignSystem.typeHero(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
                     Text("min")
-                        .font(.system(size: DesignSystem.typeBody()))
+                        .font(DesignSystem.font(DesignSystem.typeBody()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
                 Text("of \(vault.settings.dailyGoal) min goal")
-                    .font(.system(size: DesignSystem.typeSmall()))
+                    .font(DesignSystem.font(DesignSystem.typeSmall()))
                     .foregroundColor(vault.theme.textSecondary)
             }
 
@@ -1392,16 +1416,16 @@ struct FocusHeroTile: View {
 
             VStack(alignment: .trailing, spacing: 4) {
                 Text("Streak".uppercased())
-                    .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                    .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
                     .kerning(0.6)
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(vault.getStreak())")
-                        .font(.system(size: DesignSystem.typeTitle(), weight: .semibold))
+                        .font(DesignSystem.font(DesignSystem.typeTitle(), weight: .semibold))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.accent)
                     Text("days")
-                        .font(.system(size: DesignSystem.typeCaption()))
+                        .font(DesignSystem.font(DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
             }
@@ -1435,12 +1459,12 @@ struct FocusRoomView: View {
                 VStack(alignment: .leading, spacing: DesignSystem.spaceS()) {
                     HStack(spacing: DesignSystem.spaceS()) {
                         Text("Focus Goals")
-                            .font(.system(size: DesignSystem.typeSection(), weight: .medium))
+                            .font(DesignSystem.font(DesignSystem.typeSection(), weight: .medium))
                             .foregroundColor(vault.theme.textPrimary)
                         Spacer()
                         Button(action: { showingAddGoal = true }) {
                             Image(systemName: "plus")
-                                .font(.system(size: DesignSystem.typeBody(), weight: .semibold))
+                                .font(DesignSystem.font(DesignSystem.typeBody(), weight: .semibold))
                                 .foregroundColor(vault.theme.textSecondary)
                                 .frame(width: 28, height: 28)
                                 .contentShape(Rectangle())
@@ -1451,7 +1475,7 @@ struct FocusRoomView: View {
 
                     if timerManager.focusGoals.isEmpty {
                         Text("No goals set. Click + to add one.")
-                            .font(.system(size: DesignSystem.typeSmall()))
+                            .font(DesignSystem.font(DesignSystem.typeSmall()))
                             .foregroundColor(vault.theme.textSecondary)
                             .padding(.vertical, 6)
                     } else {
@@ -1459,7 +1483,7 @@ struct FocusRoomView: View {
                             HStack(spacing: DesignSystem.spaceS()) {
                                 Button { timerManager.toggleGoal(goal) } label: {
                                     Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .font(.system(size: DesignSystem.typeBody()))
+                                        .font(DesignSystem.font(DesignSystem.typeBody()))
                                         .foregroundColor(goal.isCompleted ? vault.theme.accent : vault.theme.divider)
                                         .frame(width: 24, height: 24)
                                         .contentShape(Rectangle())
@@ -1468,7 +1492,7 @@ struct FocusRoomView: View {
                                 .help(goal.isCompleted ? "Mark as not done" : "Mark as done")
 
                                 Text(goal.title)
-                                    .font(.system(size: DesignSystem.typeBody()))
+                                    .font(DesignSystem.font(DesignSystem.typeBody()))
                                     .strikethrough(goal.isCompleted)
                                     .foregroundColor(goal.isCompleted ? vault.theme.textSecondary : vault.theme.textPrimary)
 
@@ -1476,7 +1500,7 @@ struct FocusRoomView: View {
 
                                 Button { timerManager.removeGoal(goal) } label: {
                                     Image(systemName: "xmark")
-                                        .font(.system(size: DesignSystem.typeSmall()))
+                                        .font(DesignSystem.font(DesignSystem.typeSmall()))
                                         .foregroundColor(vault.theme.textSecondary.opacity(0.6))
                                         .frame(width: 24, height: 24)
                                         .contentShape(Rectangle())
@@ -1494,12 +1518,12 @@ struct FocusRoomView: View {
                 if vault.settings.showQuotes, let quote = timerManager.currentQuote {
                     VStack(spacing: 6) {
                         Text("\"\(quote.text)\"")
-                            .font(.system(size: DesignSystem.typeSection()))
+                            .font(DesignSystem.font(DesignSystem.typeSection()))
                             .italic()
                             .foregroundColor(vault.theme.textSecondary)
                             .multilineTextAlignment(.center)
                         Text(quote.author.uppercased())
-                            .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                            .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
                             .kerning(0.6)
                             .foregroundColor(vault.theme.textSecondary.opacity(0.7))
                     }
@@ -1511,11 +1535,11 @@ struct FocusRoomView: View {
                 if !timerManager.isRunning && timerManager.breakSuggestion.isEmpty == false {
                     VStack(alignment: .leading, spacing: DesignSystem.spaceXS()) {
                         Text("Smart Break Suggestion".uppercased())
-                            .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                            .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
                             .kerning(0.6)
                             .foregroundColor(vault.theme.textSecondary)
                         Text(timerManager.breakSuggestion)
-                            .font(.system(size: DesignSystem.typeBody()))
+                            .font(DesignSystem.font(DesignSystem.typeBody()))
                             .foregroundColor(vault.theme.textPrimary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -1547,7 +1571,7 @@ struct AddGoalSheet: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Add Focus Goal")
-                .font(.system(size: DesignSystem.typeTitle(), weight: .semibold))
+                .font(DesignSystem.font(DesignSystem.typeTitle(), weight: .semibold))
                 .foregroundColor(vault.theme.textPrimary)
             
             TextField("Goal title", text: $title)
@@ -1599,12 +1623,12 @@ struct TimerDisplayView: View {
 
                 VStack(spacing: 10) {
                     Text(timerManager.formattedTime)
-                        .font(.system(size: DesignSystem.typeDisplay(), weight: .medium))
+                        .font(DesignSystem.font(DesignSystem.typeDisplay(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
 
                     Text(timerManager.statusText)
-                        .font(.system(size: DesignSystem.typeSmall()))
+                        .font(DesignSystem.font(DesignSystem.typeSmall()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
             }
@@ -1637,7 +1661,7 @@ struct AmbienceSelector: View {
     var body: some View {
         VStack(spacing: 10) {
             Text("Ambience".uppercased())
-                .font(.system(size: DesignSystem.typeCaption(), weight: .medium))
+                .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
                 .kerning(0.6)
                 .foregroundColor(vault.theme.textSecondary)
             
@@ -1652,7 +1676,7 @@ struct AmbienceSelector: View {
                         vault.saveAllData()
                     } label: {
                         Text(amb)
-                            .font(.system(size: DesignSystem.typeSmall(), weight: vault.settings.ambience == amb.lowercased() ? .medium : .regular))
+                            .font(DesignSystem.font(DesignSystem.typeSmall(), weight: vault.settings.ambience == amb.lowercased() ? .medium : .regular))
                             .foregroundColor(vault.settings.ambience == amb.lowercased() ? vault.theme.buttonText : vault.theme.textSecondary)
                             .padding(.horizontal, DesignSystem.spaceS())
                             .frame(height: 26)
@@ -1673,7 +1697,7 @@ struct AmbienceSelector: View {
             if vault.settings.ambience != "none" {
                 HStack(spacing: 8) {
                     Image(systemName: "speaker.fill")
-                        .font(.system(size: DesignSystem.typeCaption()))
+                        .font(DesignSystem.font(DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                     Slider(value: $vault.settings.ambienceVolume, in: 0...1)
                         .tint(vault.theme.accent)
@@ -1696,14 +1720,14 @@ struct QuickTimerSheet: View {
     var body: some View {
         VStack(spacing: 28) {
             Text("Quick Timer")
-                .font(.system(size: 20, weight: .light, design: .serif))
+                .font(DesignSystem.font(20, weight: .light))
                 .foregroundColor(vault.theme.textPrimary)
             
             HStack(spacing: 12) {
                 ForEach([15, 25, 45, 60], id: \.self) { mins in
                     Button { selectedMinutes = mins } label: {
                         Text("\(mins)")
-                            .font(.system(size: 14, weight: selectedMinutes == mins ? .medium : .regular))
+                            .font(DesignSystem.font(14, weight: selectedMinutes == mins ? .medium : .regular))
                             .foregroundColor(selectedMinutes == mins ? vault.theme.textPrimary : vault.theme.textSecondary)
                             .frame(width: 60, height: 40)
                             .background(selectedMinutes == mins ? vault.theme.warm : Color.clear)
@@ -1714,7 +1738,7 @@ struct QuickTimerSheet: View {
             }
             
             Text("minutes")
-                .font(.system(size: 11))
+                .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
             
             Spacer()
@@ -1723,7 +1747,7 @@ struct QuickTimerSheet: View {
                 timerManager.startQuickTimer(minutes: selectedMinutes)
                 dismiss()
             }
-            .font(.system(size: 13, weight: .medium))
+            .font(DesignSystem.font(13, weight: .medium))
             .foregroundColor(vault.theme.buttonText)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -1731,7 +1755,7 @@ struct QuickTimerSheet: View {
             .cornerRadius(6)
             
             Button("Cancel") { dismiss() }
-                .font(.system(size: 12))
+                .font(DesignSystem.font(12))
                 .foregroundColor(vault.theme.textSecondary)
         }
         .padding(32)
@@ -1748,7 +1772,7 @@ struct MoodCheckInSheet: View {
     var body: some View {
         VStack(spacing: 24) {
             Text("How Do You Arrive Today?")
-                .font(.system(size: 18, weight: .light, design: .serif))
+                .font(DesignSystem.font(18, weight: .light))
                 .foregroundColor(vault.theme.textPrimary)
             
             HStack(spacing: 16) {
@@ -1761,7 +1785,7 @@ struct MoodCheckInSheet: View {
                                 .fill(mood == selectedMood ? vault.theme.seal : vault.theme.divider)
                                 .frame(width: 32, height: 32)
                             Text(vault.moodLabels[mood])
-                                .font(.system(size: 10))
+                                .font(DesignSystem.font(10))
                                 .foregroundColor(mood == selectedMood ? vault.theme.textPrimary : vault.theme.textSecondary)
                         }
                     }
@@ -1775,7 +1799,7 @@ struct MoodCheckInSheet: View {
                 vault.setTodayMood(selectedMood)
                 dismiss()
             }
-            .font(.system(size: 12, weight: .medium))
+            .font(DesignSystem.font(12, weight: .medium))
             .foregroundColor(vault.theme.buttonText)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -1804,7 +1828,7 @@ struct StatsRoomView: View {
             VStack(alignment: .leading, spacing: 48) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Your Practice")
-                        .font(.system(size: 32, weight: .light, design: .serif))
+                        .font(DesignSystem.font(32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     
@@ -1812,7 +1836,7 @@ struct StatsRoomView: View {
                         ForEach(Array(StatsPeriod.allCases.enumerated()), id: \.offset) { index, period in
                             Button { selectedPeriod = period } label: {
                                 Text(period.rawValue)
-                                    .font(.system(size: 12, weight: selectedPeriod == period ? .medium : .regular))
+                                    .font(DesignSystem.font(12, weight: selectedPeriod == period ? .medium : .regular))
                                     .foregroundColor(selectedPeriod == period ? vault.theme.textPrimary : vault.theme.textSecondary)
                                     .padding(.horizontal, 14)
                                     .padding(.vertical, 6)
@@ -1832,25 +1856,25 @@ struct StatsRoomView: View {
                 HStack(alignment: .top, spacing: 40) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Total Time")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                         Text("\(totalHours)h \(totalMinutes)m")
-                            .font(.system(size: 36, weight: .light, design: .serif))
+                            .font(DesignSystem.font(36, weight: .light))
                             .foregroundColor(vault.theme.textPrimary)
                         Text("This \(selectedPeriod.rawValue.lowercased())")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Milestone")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                         Text(milestone.title)
-                            .font(.system(size: 20, weight: .medium, design: .serif))
+                            .font(DesignSystem.font(20, weight: .medium))
                             .foregroundColor(vault.theme.textPrimary)
                         Text("\(Int(vault.getTotalHours()))h of 1000h")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                     }
                     
@@ -1861,17 +1885,17 @@ struct StatsRoomView: View {
                 if !vault.appUsageTracker.appUsage.isEmpty {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Top Apps This Week")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                         
                         ForEach(vault.appUsageTracker.getTopApps(limit: 5), id: \.0) { app, minutes in
                             HStack {
                                 Text(app)
-                                    .font(.system(size: 12))
+                                    .font(DesignSystem.font(12))
                                     .foregroundColor(vault.theme.textPrimary)
                                 Spacer()
                                 Text("\(minutes / 60)h \(minutes % 60)m")
-                                    .font(.system(size: 12))
+                                    .font(DesignSystem.font(12))
                                     .foregroundColor(vault.theme.textSecondary)
                             }
                         }
@@ -1883,7 +1907,7 @@ struct StatsRoomView: View {
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("This Week")
-                        .font(.system(size: 11))
+                        .font(DesignSystem.font(11))
                         .foregroundColor(vault.theme.textSecondary)
                     
                     HStack(alignment: .bottom, spacing: 24) {
@@ -1895,7 +1919,7 @@ struct StatsRoomView: View {
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("The Year")
-                        .font(.system(size: 11))
+                        .font(DesignSystem.font(11))
                         .foregroundColor(vault.theme.textSecondary)
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 3), count: 52), spacing: 3) {
@@ -1939,7 +1963,7 @@ struct WeeklyBar: View {
                 .fill(vault.theme.accent.opacity(barOpacity))
                 .frame(width: 24, height: max(barHeight, 2))
             Text(dayName)
-                .font(.system(size: 10))
+                .font(DesignSystem.font(10))
                 .foregroundColor(vault.theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -1979,13 +2003,13 @@ struct HabitsRoomView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Habit Tracker")
-                        .font(.system(size: 32, weight: .light, design: .serif))
+                        .font(DesignSystem.font(32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button(action: { showingAddHabit = true }) {
                         HStack(spacing: 6) {
-                            Image(systemName: "plus").font(.system(size: 11))
-                            Text("Add Habit").font(.system(size: 12))
+                            Image(systemName: "plus").font(DesignSystem.font(11))
+                            Text("Add Habit").font(DesignSystem.font(12))
                         }
                         .foregroundColor(vault.theme.textPrimary)
                         .padding(.horizontal, 16)
@@ -2027,10 +2051,10 @@ struct HabitRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(habit.title)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DesignSystem.font(14, weight: .medium))
                     .foregroundColor(vault.theme.textPrimary)
                 Text("Streak: \(habit.streak) days")
-                    .font(.system(size: 11))
+                    .font(DesignSystem.font(11))
                     .foregroundColor(vault.theme.textSecondary)
             }
             
@@ -2038,7 +2062,7 @@ struct HabitRow: View {
             
             Button(action: { vault.toggleHabitCompletion(habit) }) {
                 Image(systemName: isCompletedToday ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24))
+                    .font(DesignSystem.font(24))
                     .foregroundColor(isCompletedToday ? vault.theme.accent : vault.theme.divider)
             }
             .buttonStyle(.plain)
@@ -2064,7 +2088,7 @@ struct AddHabitSheet: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Add Habit")
-                .font(.system(size: 18, weight: .light, design: .serif))
+                .font(DesignSystem.font(18, weight: .light))
             
             TextField("Habit name", text: $title)
                 .textFieldStyle(.roundedBorder)
@@ -2100,7 +2124,7 @@ struct WeeklyReviewView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Weekly Review")
-                        .font(.system(size: 32, weight: .light, design: .serif))
+                        .font(DesignSystem.font(32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button("Generate Review") {
@@ -2122,16 +2146,16 @@ struct WeeklyReviewView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Top Apps")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(DesignSystem.font(14, weight: .medium))
                                 .foregroundColor(vault.theme.textPrimary)
                             ForEach(review.topApps, id: \.0) { app, minutes in
                                 HStack {
                                     Text(app)
-                                        .font(.system(size: 12))
+                                        .font(DesignSystem.font(12))
                                         .foregroundColor(vault.theme.textPrimary)
                                     Spacer()
                                     Text("\(minutes / 60)h \(minutes % 60)m")
-                                        .font(.system(size: 12))
+                                        .font(DesignSystem.font(12))
                                         .foregroundColor(vault.theme.textSecondary)
                                 }
                             }
@@ -2142,15 +2166,15 @@ struct WeeklyReviewView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Achievements")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(DesignSystem.font(14, weight: .medium))
                                 .foregroundColor(vault.theme.textPrimary)
                             ForEach(review.achievements, id: \.self) { achievement in
                                 HStack {
                                     Image(systemName: "star.fill")
-                                        .font(.system(size: 12))
+                                        .font(DesignSystem.font(12))
                                         .foregroundColor(vault.theme.seal)
                                     Text(achievement)
-                                        .font(.system(size: 12))
+                                        .font(DesignSystem.font(12))
                                         .foregroundColor(vault.theme.textPrimary)
                                 }
                             }
@@ -2161,11 +2185,11 @@ struct WeeklyReviewView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Insights")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(DesignSystem.font(14, weight: .medium))
                                 .foregroundColor(vault.theme.textPrimary)
                             ForEach(review.insights, id: \.self) { insight in
                                 Text(insight)
-                                    .font(.system(size: 12))
+                                    .font(DesignSystem.font(12))
                                     .foregroundColor(vault.theme.textPrimary)
                             }
                         }
@@ -2194,10 +2218,10 @@ struct StatCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 11))
+                .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
             Text(value)
-                .font(.system(size: 24, weight: .medium, design: .serif))
+                .font(DesignSystem.font(24, weight: .medium))
                 .foregroundColor(vault.theme.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -2229,11 +2253,11 @@ struct NotesRoomView: View {
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 11))
+                        .font(DesignSystem.font(11))
                         .foregroundColor(vault.theme.textSecondary)
                     TextField("Search", text: $searchText)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 12))
+                        .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.textPrimary)
                 }
                 .padding(.horizontal, 16)
@@ -2262,8 +2286,8 @@ struct NotesRoomView: View {
                 
                 Button(action: { showingNewNote = true }) {
                     HStack {
-                        Image(systemName: "plus").font(.system(size: 11))
-                        Text("New Note").font(.system(size: 12))
+                        Image(systemName: "plus").font(DesignSystem.font(11))
+                        Text("New Note").font(DesignSystem.font(12))
                         Spacer()
                     }
                     .foregroundColor(vault.theme.textPrimary)
@@ -2282,13 +2306,13 @@ struct NotesRoomView: View {
                     EnsoLogo()
                         .scaleEffect(2)
                     Text("Select a note")
-                        .font(.system(size: 14, design: .serif))
+                        .font(DesignSystem.font(14))
                         .foregroundColor(vault.theme.textSecondary)
                     Text("or create a new one")
-                        .font(.system(size: 12))
+                        .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.textSecondary.opacity(0.6))
                     Button("New Note") { showingNewNote = true }
-                        .font(.system(size: 12))
+                        .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.textPrimary)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 8)
@@ -2310,17 +2334,17 @@ struct NoteListItem: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(note.title.isEmpty ? "Untitled" : note.title)
-                .font(.system(size: 13, weight: isSelected ? .medium : .regular, design: .serif))
+                .font(DesignSystem.font(13, weight: isSelected ? .medium : .regular))
                 .foregroundColor(vault.theme.textPrimary)
                 .lineLimit(1)
             
             Text(note.content.prefix(50))
-                .font(.system(size: 11))
+                .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
                 .lineLimit(2)
             
             Text(note.date, style: .date)
-                .font(.system(size: 10))
+                .font(DesignSystem.font(10))
                 .foregroundColor(vault.theme.textSecondary.opacity(0.6))
         }
         .padding(.vertical, 10)
@@ -2338,7 +2362,7 @@ struct NoteEditorView: View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
                 TextField("Title", text: $note.title)
-                    .font(.system(size: 22, weight: .light, design: .serif))
+                    .font(DesignSystem.font(22, weight: .light))
                     .textFieldStyle(.plain)
                     .foregroundColor(vault.theme.textPrimary)
                     .onChange(of: note.title) { _, _ in saveNote() }
@@ -2355,7 +2379,7 @@ struct NoteEditorView: View {
                     Divider().frame(height: 16)
                     Button(action: { showPreview.toggle() }) {
                         Image(systemName: showPreview ? "text.alignleft" : "eye")
-                            .font(.system(size: 11))
+                            .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                             .padding(6)
                     }
@@ -2364,14 +2388,14 @@ struct NoteEditorView: View {
                 
                 Button(action: { deleteNote() }) {
                     Image(systemName: "trash")
-                        .font(.system(size: 12))
+                        .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.seal)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 8)
                 
                 Text("Saved \(timeAgo)")
-                    .font(.system(size: 10))
+                    .font(DesignSystem.font(10))
                     .foregroundColor(vault.theme.textSecondary.opacity(0.6))
             }
             .padding(.horizontal, 32)
@@ -2382,7 +2406,7 @@ struct NoteEditorView: View {
             if showPreview {
                 ScrollView {
                     Text(note.content)
-                        .font(.system(size: 14))
+                        .font(DesignSystem.font(14))
                         .foregroundColor(vault.theme.textPrimary)
                         .textSelection(.enabled)
                         .padding(32)
@@ -2391,7 +2415,7 @@ struct NoteEditorView: View {
                 }
             } else {
                 TextEditor(text: $note.content)
-                    .font(.system(size: 14))
+                    .font(DesignSystem.font(14))
                     .foregroundColor(vault.theme.textPrimary)
                     .scrollContentBackground(.hidden)
                     .padding(32)
@@ -2438,7 +2462,7 @@ struct FormatButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 11))
+                .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
                 .padding(6)
         }
@@ -2455,12 +2479,12 @@ struct NewNoteSheet: View {
     var body: some View {
         VStack(spacing: 24) {
             TextField("Title", text: $title)
-                .font(.system(size: 22, weight: .light, design: .serif))
+                .font(DesignSystem.font(22, weight: .light))
                 .textFieldStyle(.plain)
                 .foregroundColor(vault.theme.textPrimary)
             
             TextEditor(text: $content)
-                .font(.system(size: 14))
+                .font(DesignSystem.font(14))
                 .foregroundColor(vault.theme.textPrimary)
                 .scrollContentBackground(.hidden)
                 .frame(minHeight: 320)
@@ -2470,7 +2494,7 @@ struct NewNoteSheet: View {
             
             HStack {
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 12))
+                    .font(DesignSystem.font(12))
                     .foregroundColor(vault.theme.textSecondary)
                     .buttonStyle(.plain)
                 
@@ -2482,7 +2506,7 @@ struct NewNoteSheet: View {
                     vault.saveAllData()
                     dismiss()
                 }
-                .font(.system(size: 12, weight: .medium))
+                .font(DesignSystem.font(12, weight: .medium))
                 .foregroundColor(vault.theme.buttonText)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 10)
@@ -2507,13 +2531,13 @@ struct ScheduleRoomView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Weekly Rhythm")
-                        .font(.system(size: 32, weight: .light, design: .serif))
+                        .font(DesignSystem.font(32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button(action: { showingAddEvent = true }) {
                         HStack(spacing: 6) {
-                            Image(systemName: "plus").font(.system(size: 11))
-                            Text("Add Event").font(.system(size: 12))
+                            Image(systemName: "plus").font(DesignSystem.font(11))
+                            Text("Add Event").font(DesignSystem.font(12))
                         }
                         .foregroundColor(vault.theme.textPrimary)
                         .padding(.horizontal, 16)
@@ -2557,7 +2581,7 @@ struct ScheduleDayRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 32) {
             Text(day)
-                .font(.system(size: 14, weight: isToday ? .medium : .regular, design: .serif))
+                .font(DesignSystem.font(14, weight: isToday ? .medium : .regular))
                 .foregroundColor(isToday ? vault.theme.seal : vault.theme.textPrimary)
                 .frame(width: 100, alignment: .leading)
                 .padding(.vertical, 20)
@@ -2565,28 +2589,28 @@ struct ScheduleDayRow: View {
             VStack(alignment: .leading, spacing: 8) {
                 if events.isEmpty {
                     Text("Open")
-                        .font(.system(size: 12))
+                        .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.textSecondary.opacity(0.5))
                         .padding(.vertical, 20)
                 } else {
                     ForEach(events) { event in
                         HStack(spacing: 16) {
                             Text(event.startTime)
-                                .font(.system(size: 11, weight: .medium))
+                                .font(DesignSystem.font(11, weight: .medium))
                                 .foregroundColor(vault.theme.textSecondary)
                                 .frame(width: 50, alignment: .leading)
                             Text(event.title)
-                                .font(.system(size: 13))
+                                .font(DesignSystem.font(13))
                                 .foregroundColor(vault.theme.textPrimary)
                             Text("– \(event.endTime)")
-                                .font(.system(size: 11))
+                                .font(DesignSystem.font(11))
                                 .foregroundColor(vault.theme.textSecondary)
                             
                             Spacer()
                             
                             Button(action: { deleteEvent(event) }) {
                                 Image(systemName: "trash")
-                                    .font(.system(size: 10))
+                                    .font(DesignSystem.font(10))
                                     .foregroundColor(vault.theme.seal.opacity(0.6))
                             }
                             .buttonStyle(.plain)
@@ -2620,7 +2644,7 @@ struct AddEventSheet: View {
     var body: some View {
         VStack(spacing: 24) {
             Text("Add Event")
-                .font(.system(size: 20, weight: .light, design: .serif))
+                .font(DesignSystem.font(20, weight: .light))
                 .foregroundColor(vault.theme.textPrimary)
             
             TextField("What", text: $title)
@@ -2637,14 +2661,14 @@ struct AddEventSheet: View {
             
             HStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Starts").font(.system(size: 10)).foregroundColor(vault.theme.textSecondary)
+                    Text("Starts").font(DesignSystem.font(10)).foregroundColor(vault.theme.textSecondary)
                     TextField("09:00", text: $startTime)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 120)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Ends").font(.system(size: 10)).foregroundColor(vault.theme.textSecondary)
+                    Text("Ends").font(DesignSystem.font(10)).foregroundColor(vault.theme.textSecondary)
                     TextField("10:00", text: $endTime)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 120)
@@ -2656,7 +2680,7 @@ struct AddEventSheet: View {
             
             HStack {
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 12))
+                    .font(DesignSystem.font(12))
                     .foregroundColor(vault.theme.textSecondary)
                     .buttonStyle(.plain)
                 
@@ -2674,7 +2698,7 @@ struct AddEventSheet: View {
                     vault.saveAllData()
                     dismiss()
                 }
-                .font(.system(size: 12, weight: .medium))
+                .font(DesignSystem.font(12, weight: .medium))
                 .foregroundColor(vault.theme.buttonText)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 10)
@@ -2697,13 +2721,13 @@ struct SettingsRoomView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
                 Text("Settings")
-                    .font(.system(size: 32, weight: .light, design: .serif))
+                    .font(DesignSystem.font(32, weight: .light))
                     .foregroundColor(vault.theme.textPrimary)
                     .padding(.top, 40)
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Appearance")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignSystem.font(14, weight: .medium))
                         .foregroundColor(vault.theme.textPrimary)
                     
                     Picker("Theme", selection: $vault.currentTheme) {
@@ -2720,7 +2744,7 @@ struct SettingsRoomView: View {
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Timer")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignSystem.font(14, weight: .medium))
                         .foregroundColor(vault.theme.textPrimary)
                     
                     SettingRow(title: "Daily Goal", value: $vault.settings.dailyGoal, range: 30...300, step: 10, unit: "min")
@@ -2735,7 +2759,7 @@ struct SettingsRoomView: View {
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Integrations")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignSystem.font(14, weight: .medium))
                         .foregroundColor(vault.theme.textPrimary)
                     
                     Toggle("Calendar Integration", isOn: $vault.settings.calendarIntegration)
@@ -2753,12 +2777,12 @@ struct SettingsRoomView: View {
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Vault & Data")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignSystem.font(14, weight: .medium))
                         .foregroundColor(vault.theme.textPrimary)
                     
                     HStack {
                         Text(vault.vaultURL?.path ?? "No vault selected")
-                            .font(.system(size: 12))
+                            .font(DesignSystem.font(12))
                             .foregroundColor(vault.theme.textSecondary)
                             .lineLimit(1)
                         Spacer()
@@ -2769,7 +2793,7 @@ struct SettingsRoomView: View {
                     }
                     
                     Text("Tip: Choose an iCloud Drive folder for automatic sync across devices")
-                        .font(.system(size: 10))
+                        .font(DesignSystem.font(10))
                         .foregroundColor(vault.theme.textSecondary.opacity(0.6))
                     
                     HStack(spacing: 12) {
@@ -2816,11 +2840,11 @@ struct SettingRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 13))
+                .font(DesignSystem.font(13))
                 .foregroundColor(vault.theme.textPrimary)
             Spacer()
             Text("\(value) \(unit)")
-                .font(.system(size: 13, weight: .medium, design: .serif))
+                .font(DesignSystem.font(13, weight: .medium))
                 .foregroundColor(vault.theme.textPrimary)
                 .frame(width: 80, alignment: .trailing)
             Slider(value: Binding(
@@ -2846,10 +2870,10 @@ struct OnboardingView: View {
                     EnsoLogo()
                         .scaleEffect(3)
                     Text("Sumi")
-                        .font(.system(size: 24, weight: .light, design: .serif))
+                        .font(DesignSystem.font(24, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Text("A Quiet Space For Focused Study")
-                        .font(.system(size: 13))
+                        .font(DesignSystem.font(13))
                         .foregroundColor(vault.theme.textSecondary)
                     
                     Spacer()
@@ -2857,7 +2881,7 @@ struct OnboardingView: View {
                     Button("Choose Vault Location") {
                         if vault.chooseVaultFolder() != nil { currentStep = 1 }
                     }
-                    .font(.system(size: 12, weight: .medium))
+                    .font(DesignSystem.font(12, weight: .medium))
                     .foregroundColor(vault.theme.buttonText)
                     .padding(.horizontal, 28)
                     .padding(.vertical, 12)
@@ -2868,16 +2892,16 @@ struct OnboardingView: View {
             } else {
                 VStack(spacing: 24) {
                     Text("You're All Set")
-                        .font(.system(size: 28, weight: .light, design: .serif))
+                        .font(DesignSystem.font(28, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Text("Your vault is ready")
-                        .font(.system(size: 13))
+                        .font(DesignSystem.font(13))
                         .foregroundColor(vault.theme.textSecondary)
                     
                     Spacer()
                     
                     Button("Begin") { hasCompletedSetup = true }
-                        .font(.system(size: 12, weight: .medium))
+                        .font(DesignSystem.font(12, weight: .medium))
                         .foregroundColor(vault.theme.buttonText)
                         .padding(.horizontal, 28)
                         .padding(.vertical, 12)
