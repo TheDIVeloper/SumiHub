@@ -60,7 +60,7 @@ struct Habit: Identifiable, Codable {
     }
 }
 
-struct Quote: Identifiable, Codable {
+struct Quote: Identifiable, Codable, Equatable {
     let id: UUID
     var text: String
     var author: String
@@ -121,7 +121,7 @@ enum AppTheme: String, Codable, CaseIterable {
                 card: Color(red: 0.118, green: 0.122, blue: 0.102),
                 textPrimary: Color(red: 0.906, green: 0.886, blue: 0.831),
                 textSecondary: Color(red: 0.561, green: 0.541, blue: 0.471),
-                accent: Color(red: 0.592, green: 0.663, blue: 0.549),
+                accent: SumiSeason.current.accent,
                 seal: Color(red: 0.831, green: 0.412, blue: 0.290),
                 divider: Color(red: 0.200, green: 0.204, blue: 0.169),
                 warm: Color(red: 0.129, green: 0.110, blue: 0.090),
@@ -259,16 +259,6 @@ struct PanelSurface: ViewModifier {
             .background(
                 RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
                     .fill(theme.card)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
-                    .stroke(theme.divider, lineWidth: 1)
-            )
-            .shadow(
-                color: theme.ink.opacity(DesignSystem.shadowColorOpacity()),
-                radius: DesignSystem.shadowRadius(),
-                x: 0,
-                y: DesignSystem.shadowOffsetY()
             )
     }
 }
@@ -866,6 +856,7 @@ class TimerManager: ObservableObject {
     @Published var appsUsed: [String] = []
     @Published var focusGoals: [FocusGoal] = []
     @Published var breakSuggestion: String = ""
+    var quotePool: [Quote] = []
     
     init() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleToggle), name: .toggleTimer, object: nil)
@@ -957,14 +948,14 @@ class TimerManager: ObservableObject {
     private func startQuoteRotation() {
         quoteTimer?.invalidate()
         rotateQuote()
-        quoteTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+        quoteTimer = Timer.scheduledTimer(withTimeInterval: 18, repeats: true) { [weak self] _ in
             self?.rotateQuote()
         }
     }
     
     func rotateQuote() {
-        let allQuotes = VaultManager().defaultQuotes
-        currentQuote = allQuotes.randomElement()
+        let pool = quotePool.isEmpty ? VaultManager().defaultQuotes : quotePool
+        currentQuote = pool.randomElement()
     }
     
     func generateBreakSuggestion() {
@@ -1060,6 +1051,125 @@ struct Zen {
     static var buttonText: Color { AppTheme.sumi.colors.buttonText }
 }
 
+// Seasonal accent rotation — the Sumi web app shifts its accent + washes by
+// season (dec/oct→day-of-month rules from the site: Dec-Feb winter, Mar-May
+// spring, Jun-Aug summer, Sep-Nov autumn). Dark-palette values verbatim.
+enum SumiSeason {
+    case winter, spring, summer, autumn
+    
+    static var current: SumiSeason {
+        let m = Calendar.current.component(.month, from: Date())
+        switch m {
+        case 12, 1, 2: return .winter
+        case 3, 4, 5: return .spring
+        case 6, 7, 8: return .summer
+        default: return .autumn
+        }
+    }
+    
+    var accent: Color {
+        switch self {
+        case .winter: return Color(red: 0.576, green: 0.639, blue: 0.694)
+        case .spring: return Color(red: 0.612, green: 0.671, blue: 0.525)
+        case .summer: return Color(red: 0.592, green: 0.663, blue: 0.549)
+        case .autumn: return Color(red: 0.753, green: 0.553, blue: 0.353)
+        }
+    }
+    
+    var washAccent: Color {
+        switch self {
+        case .winter: return Color(red: 0.576, green: 0.639, blue: 0.694)
+        case .spring: return Color(red: 0.612, green: 0.671, blue: 0.525)
+        case .summer: return Color(red: 0.592, green: 0.663, blue: 0.549)
+        case .autumn: return Color(red: 0.753, green: 0.553, blue: 0.353)
+        }
+    }
+    
+    var washRust: Color {
+        switch self {
+        case .winter: return Color(red: 0.576, green: 0.639, blue: 0.694)
+        case .spring: return Color(red: 0.839, green: 0.627, blue: 0.667)
+        case .summer: return Color(red: 0.831, green: 0.667, blue: 0.353)
+        case .autumn: return Color(red: 0.831, green: 0.471, blue: 0.275)
+        }
+    }
+}
+
+// Slow-drifting radial washes behind the content — the web app's animated
+// multi-plate radial-gradient backdrop. Sumi-only.
+struct DriftWashView: View {
+    let theme: ThemeColors
+    @State private var drifting = false
+    
+    var body: some View {
+        GeometryReader { g in
+            let s = SumiSeason.current
+            ZStack {
+                RadialGradient(
+                    colors: [s.washAccent.opacity(0.10), .clear],
+                    center: .init(x: 0.22, y: 0.24),
+                    startRadius: 0, endRadius: g.size.width * 0.75
+                )
+                RadialGradient(
+                    colors: [s.washRust.opacity(0.08), .clear],
+                    center: .init(x: 0.82, y: 0.78),
+                    startRadius: 0, endRadius: g.size.width * 0.7
+                )
+                RadialGradient(
+                    colors: [s.washAccent.opacity(0.07), .clear],
+                    center: .init(x: 0.74, y: 0.14),
+                    startRadius: 0, endRadius: g.size.width * 0.6
+                )
+            }
+            .scaleEffect(drifting ? 1.06 : 1.0)
+            .offset(x: drifting ? -12 : 10, y: drifting ? 10 : -8)
+            .animation(
+                .easeInOut(duration: 45).repeatForever(autoreverses: true),
+                value: drifting
+            )
+            .onAppear { drifting = true }
+            .allowsHitTesting(false)
+        }
+    }
+}
+
+// Fine film-grain overlay (fractal-noise style at ~4.5% opacity), the web
+// app's fixed noise layer. Sumi-only.
+struct GrainView: View {
+    let theme: ThemeColors
+    
+    var body: some View {
+        Canvas { context, size in
+            var rng = SeedRandom(seed: 0x13579BDF)
+            for _ in 0..<6000 {
+                let x = rng.next() * size.width
+                let y = rng.next() * size.height
+                let light = rng.next() < 0.5
+                let alpha = 0.10 + rng.next() * 0.12
+                let rect = CGRect(x: x, y: y, width: 1.2, height: 1.2)
+                context.fill(
+                    Path(rect),
+                    with: .color(.white.opacity(light ? alpha * 0.5 : alpha * 0.35))
+                )
+            }
+        }
+        .blendMode(.plusLighter)
+        .opacity(0.5)
+        .allowsHitTesting(false)
+        .ignoresSafeArea()
+    }
+}
+
+struct SeedRandom {
+    var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> Double {
+        state &+= 0xA0761D6478BD642F
+        let mix = (state ^ (state >> 29)) &* 0xBF58476D1CE4E5B9
+        return Double((mix & 0x00FFFFFFFFFFFFFF) >> 10) / Double(0x10000000000000)
+    }
+}
+
 // MARK: - Custom Segmented Picker
 struct ZenSegmentedPicker: View {
     @Binding var selection: TimerManager.TimerMode
@@ -1083,10 +1193,6 @@ struct ZenSegmentedPicker: View {
                             RoundedRectangle(cornerRadius: DesignSystem.radiusChip())
                                 .fill(selection == option.0 ? vault.theme.card : Color.clear)
                         )
-                        .shadow(color: vault.theme.ink.opacity(selection == option.0 ? DesignSystem.shadowColorOpacity() : 0),
-                                radius: DesignSystem.shadowRadius() * 0.6,
-                                x: 0,
-                                y: 1)
                 }
                 .buttonStyle(.plain)
             }
@@ -1101,7 +1207,6 @@ struct ZenSegmentedPicker: View {
 struct ContentView: View {
     @AppStorage("hasCompletedSetup") private var hasCompletedSetup = false
     @AppStorage("zenMode") private var zenMode = false
-    @AppStorage("currentSection") private var currentSection: AppSection = .study
     @State private var selectedDestination: Destination = .focus
     @State private var showingMoodCheckIn = false
     @State private var showingMenuBarInfo = false
@@ -1113,11 +1218,6 @@ struct ContentView: View {
             let current = UserDefaults.standard.bool(forKey: "zenMode")
             UserDefaults.standard.set(!current, forKey: "zenMode")
         }
-    }
-    
-    enum AppSection: String, CaseIterable {
-        case study = "Study"
-        case powerUser = "Power User"
     }
     
     enum Destination: String, CaseIterable, Identifiable {
@@ -1143,15 +1243,7 @@ struct ContentView: View {
         }
     }
     
-    var studyDestinations: [Destination] { [.focus, .stats, .notes, .schedule, .habits, .settings] }
-    var powerUserDestinations: [Destination] { [.weeklyReview, .stats, .settings] }
-    
-    var currentDestinations: [Destination] {
-        switch currentSection {
-        case .study: return studyDestinations
-        case .powerUser: return powerUserDestinations
-        }
-    }
+    var studyDestinations: [Destination] { [.focus, .stats, .notes, .schedule, .habits, .weeklyReview, .settings] }
     
     var body: some View {
         Group {
@@ -1159,14 +1251,13 @@ struct ContentView: View {
                 OnboardingView(hasCompletedSetup: $hasCompletedSetup, vault: vault)
             } else {
                 MainAppView(
-                    currentSection: $currentSection,
                     selectedDestination: $selectedDestination,
                     vault: vault,
                     timerManager: timerManager,
                     zenMode: $zenMode,
                     showingMoodCheckIn: $showingMoodCheckIn,
                     showingMenuBarInfo: $showingMenuBarInfo,
-                    currentDestinations: currentDestinations
+                    currentDestinations: studyDestinations
                 )
                 .environmentObject(vault)
                 .environmentObject(timerManager)
@@ -1188,7 +1279,6 @@ struct ContentView: View {
 }
 
 struct MainAppView: View {
-    @Binding var currentSection: ContentView.AppSection
     @Binding var selectedDestination: ContentView.Destination
     @ObservedObject var vault: VaultManager
     @ObservedObject var timerManager: TimerManager
@@ -1202,7 +1292,6 @@ struct MainAppView: View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             if !zenMode {
                 SidebarView(
-                    currentSection: $currentSection,
                     selectedDestination: $selectedDestination,
                     showingQuickTimer: $showingQuickTimer,
                     showingMenuBarInfo: $showingMenuBarInfo,
@@ -1214,6 +1303,11 @@ struct MainAppView: View {
         } detail: {
             ZStack {
                 vault.theme.background.ignoresSafeArea()
+                
+                if vault.theme.serifDisplay {
+                    DriftWashView(theme: vault.theme).ignoresSafeArea()
+                    GrainView(theme: vault.theme)
+                }
                 
                 VStack(spacing: 0) {
                     HStack {
@@ -1262,16 +1356,8 @@ struct MainAppView: View {
             .animation(.easeInOut(duration: 0.3), value: zenMode)
         }
         .navigationSplitViewStyle(.balanced)
-        .navigationTitle(currentSection == .study ? "Sumi — Focus" : "Sumi — Power User")
+        .navigationTitle("Sumi")
         .toolbar {
-            ToolbarItemGroup(placement: .principal) {
-                Picker("Section", selection: $currentSection) {
-                    Text("Study").tag(ContentView.AppSection.study)
-                    Text("Power User").tag(ContentView.AppSection.powerUser)
-                }
-                .pickerStyle(.segmented)
-                .fixedSize()
-            }
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { withAnimation(.easeInOut) { zenMode.toggle() } }) {
                     Label(zenMode ? "Zen On" : "Zen Off", systemImage: zenMode ? "moon.stars.fill" : "moon")
@@ -1295,11 +1381,16 @@ struct MainAppView: View {
             MoodCheckInSheet()
                 .frame(width: 400, height: 300)
         }
+        .onAppear {
+            timerManager.quotePool = vault.quotes
+        }
+        .onChange(of: vault.quotes) { _, newQuotes in
+            timerManager.quotePool = newQuotes
+        }
     }
 }
 
 struct SidebarView: View {
-    @Binding var currentSection: ContentView.AppSection
     @Binding var selectedDestination: ContentView.Destination
     @Binding var showingQuickTimer: Bool
     @Binding var showingMenuBarInfo: Bool
@@ -1308,16 +1399,6 @@ struct SidebarView: View {
 
     var body: some View {
         List(selection: $selectedDestination) {
-            Section {
-                Label("Study", systemImage: "books.vertical")
-                    .font(DesignSystem.font(DesignSystem.typeSmall()))
-                    .foregroundColor(vault.theme.textSecondary)
-            } header: {
-                Text("ROOMS")
-                    .font(DesignSystem.font(DesignSystem.typeCaption()))
-                    .foregroundColor(vault.theme.textSecondary)
-            }
-
             Section {
                 ForEach(currentDestinations) { destination in
                     Label(destination.rawValue, systemImage: destination.icon)
@@ -1399,43 +1480,49 @@ struct FocusHeroTile: View {
     @EnvironmentObject var vault: VaultManager
 
     var body: some View {
-        HStack(alignment: .lastTextBaseline, spacing: DesignSystem.spaceM()) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Today".uppercased())
-                    .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
-                    .kerning(0.6)
-                    .foregroundColor(vault.theme.textSecondary)
-                HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
-                    Text("\(todayMinutes)")
-                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeHero(), weight: .medium))
-                        .monospacedDigit()
-                        .foregroundColor(vault.theme.textPrimary)
-                    Text("min")
-                        .font(DesignSystem.font(DesignSystem.typeBody()))
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .lastTextBaseline, spacing: DesignSystem.spaceM()) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Today".uppercased())
+                        .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
+                        .kerning(0.6)
+                        .foregroundColor(vault.theme.textSecondary)
+                    HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
+                        Text("\(todayMinutes)")
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeHero(), weight: .medium))
+                            .monospacedDigit()
+                            .foregroundColor(vault.theme.textPrimary)
+                        Text("min")
+                            .font(DesignSystem.font(DesignSystem.typeBody()))
+                            .foregroundColor(vault.theme.textSecondary)
+                    }
+                    Text("of \(vault.settings.dailyGoal) min goal")
+                        .font(DesignSystem.font(DesignSystem.typeSmall()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
-                Text("of \(vault.settings.dailyGoal) min goal")
-                    .font(DesignSystem.font(DesignSystem.typeSmall()))
-                    .foregroundColor(vault.theme.textSecondary)
-            }
 
-            Spacer(minLength: DesignSystem.spaceM())
+                Spacer(minLength: DesignSystem.spaceM())
 
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("Streak".uppercased())
-                    .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
-                    .kerning(0.6)
-                    .foregroundColor(vault.theme.textSecondary)
-                HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
-                    Text("\(vault.getStreak())")
-                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeTitle(), weight: .semibold))
-                        .monospacedDigit()
-                        .foregroundColor(vault.theme.accent)
-                    Text("days")
-                        .font(DesignSystem.font(DesignSystem.typeCaption()))
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("Streak".uppercased())
+                        .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
+                        .kerning(0.6)
                         .foregroundColor(vault.theme.textSecondary)
+                    HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
+                        Text("\(vault.getStreak())")
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeTitle(), weight: .semibold))
+                            .monospacedDigit()
+                            .foregroundColor(vault.theme.accent)
+                        Text("days")
+                            .font(DesignSystem.font(DesignSystem.typeCaption()))
+                            .foregroundColor(vault.theme.textSecondary)
+                    }
                 }
             }
+
+            BranchView(streak: vault.getStreak(), theme: vault.theme)
+
+            MoodDotsRow(theme: vault.theme)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .surface(vault.theme)
@@ -1446,6 +1533,116 @@ struct FocusHeroTile: View {
         formatter.dateFormat = "yyyy-MM-dd"
         let key = formatter.string(from: Date())
         return vault.dailyStats[key]?.totalMinutes ?? 0
+    }
+}
+
+// Branch-and-bloom streak flourish (Sumi web app): an ink branch that grows a
+// rust blossom for each day of the streak, with a dashed bud for the next.
+struct BranchView: View {
+    let streak: Int
+    let theme: ThemeColors
+
+    // Web app BRANCH_PTS — one blossom site per streak day, head to tail.
+    private static let points: [CGPoint] = [
+        CGPoint(x: 16, y: 66), CGPoint(x: 36, y: 58), CGPoint(x: 56, y: 52),
+        CGPoint(x: 76, y: 45), CGPoint(x: 96, y: 40), CGPoint(x: 116, y: 35),
+        CGPoint(x: 136, y: 32), CGPoint(x: 156, y: 28), CGPoint(x: 176, y: 26),
+        CGPoint(x: 196, y: 23), CGPoint(x: 214, y: 20), CGPoint(x: 228, y: 16)
+    ]
+
+    var body: some View {
+        let blossoms = min(streak, BranchView.points.count)
+        VStack(alignment: .leading, spacing: 6) {
+            ZStack(alignment: .topLeading) {
+                BranchPath()
+                    .stroke(theme.textSecondary.opacity(0.7), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+                    .frame(width: 240, height: 76)
+                    .fixedSize()
+
+                ForEach(0..<blossoms, id: \.self) { i in
+                    let p = BranchView.points[i]
+                    if i == blossoms - 1 && blossoms >= 7 {
+                        Circle()
+                            .stroke(theme.seal.opacity(0.5), lineWidth: 1.5)
+                            .frame(width: 22, height: 22)
+                            .position(x: p.x + 3, y: p.y + 3)
+                    }
+                    Circle()
+                        .fill(theme.seal)
+                        .frame(width: 14, height: 14)
+                        .position(x: p.x + 3, y: p.y + 3)
+                }
+
+                if blossoms < BranchView.points.count {
+                    let p = BranchView.points[blossoms]
+                    Circle()
+                        .stroke(theme.accent, style: StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
+                        .frame(width: 14, height: 14)
+                        .position(x: p.x + 3, y: p.y + 3)
+                }
+            }
+            .frame(width: 240, height: 76, alignment: .topLeading)
+            .padding(.top, 2)
+
+            Text(blossomCaption)
+                .font(DesignSystem.font(10))
+                .foregroundColor(theme.textSecondary.opacity(0.8))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var blossomCaption: String {
+        if streak <= 0 { return "A bare branch — today begins the bloom." }
+        if streak >= BranchView.points.count { return "Full bloom — your streak is flourishing." }
+        return "One blossom for each day of your streak."
+    }
+}
+
+// The web app's mood line: five dots, sized by brightness, plus the mood word.
+struct MoodDotsRow: View {
+    let theme: ThemeColors
+    @EnvironmentObject var vault: VaultManager
+
+    var body: some View {
+        let key: String = {
+            let f = DateFormatter()
+            f.dateFormat = "yyyy-MM-dd"
+            return f.string(from: Date())
+        }()
+        let mood = vault.dailyStats[key]?.mood
+        let moodLabel = mood.flatMap { v in vault.moodLabels.indices.contains(v) ? vault.moodLabels[v] : nil } ?? "—"
+
+        HStack(spacing: 8) {
+            Text("Mood".uppercased())
+                .font(DesignSystem.font(DesignSystem.typeCaption(), weight: .medium))
+                .kerning(0.6)
+                .foregroundColor(theme.textSecondary)
+
+            ForEach(0..<5, id: \.self) { i in
+                Circle()
+                    .fill(i < (mood.map { $0 + 1 } ?? 0) ? theme.seal : theme.divider.opacity(0.8))
+                    .frame(width: 5 + CGFloat(i) * 1.8, height: 5 + CGFloat(i) * 1.8)
+            }
+
+            Text(moodLabel)
+                .font(DesignSystem.displayFont(serif: theme.serifDisplay, size: 12, weight: .medium))
+                .foregroundColor(theme.textSecondary)
+        }
+        .font(DesignSystem.font(DesignSystem.typeCaption()))
+    }
+}
+
+struct BranchPath: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 8, y: 74))
+        path.addCurve(to: CGPoint(x: 116, y: 36),
+                      control1: CGPoint(x: 50, y: 62),
+                      control2: CGPoint(x: 80, y: 50))
+        path.addCurve(to: CGPoint(x: 234, y: 12),
+                      control1: CGPoint(x: 150, y: 26),
+                      control2: CGPoint(x: 190, y: 20))
+        return path
     }
 }
 
@@ -1537,6 +1734,11 @@ struct FocusRoomView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, DesignSystem.spaceS())
                     .animation(.easeInOut(duration: 0.5), value: quote.id)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        timerManager.rotateQuote()
+                    }
+                    .help("Click for another")
                 }
 
                 if !timerManager.isRunning && timerManager.breakSuggestion.isEmpty == false {
@@ -1607,7 +1809,6 @@ struct AddGoalSheet: View {
 struct TimerDisplayView: View {
     @EnvironmentObject var timerManager: TimerManager
     @EnvironmentObject var vault: VaultManager
-    @State private var haloPulse = false
 
     var body: some View {
         VStack(spacing: 28) {
@@ -1629,16 +1830,6 @@ struct TimerDisplayView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: timerManager.progress)
 
-                if vault.theme.serifDisplay {
-                    Circle()
-                        .stroke(vault.theme.accent.opacity(0.22), lineWidth: 1)
-                        .frame(width: 296, height: 296)
-                        .scaleEffect(haloPulse ? 1.05 : 1.0)
-                        .opacity(timerManager.isRunning ? (haloPulse ? 0.5 : 0.2) : 0.0)
-                        .animation(.easeInOut(duration: 3.2).repeatForever(autoreverses: true), value: haloPulse)
-                        .allowsHitTesting(false)
-                }
-
                 VStack(spacing: 10) {
                     Text(timerManager.formattedTime)
                         .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeDisplay(), weight: .medium))
@@ -1649,9 +1840,6 @@ struct TimerDisplayView: View {
                         .font(DesignSystem.font(DesignSystem.typeSmall()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
-            }
-            .onAppear {
-                haloPulse = true
             }
 
             AmbienceSelector()
@@ -2052,6 +2240,7 @@ struct HabitsRoomView: View {
                 if vault.habits.isEmpty {
                     Text("No habits tracked yet. Add one to get started.")
                         .foregroundColor(vault.theme.textSecondary)
+                        .padding(.horizontal, 60)
                         .padding(.top, 40)
                 }
                 
@@ -2222,6 +2411,7 @@ struct WeeklyReviewView: View {
                 } else {
                     Text("Click \"Generate Review\" to see your weekly summary.")
                         .foregroundColor(vault.theme.textSecondary)
+                        .padding(.horizontal, 60)
                         .padding(.top, 40)
                 }
                 
@@ -2294,6 +2484,7 @@ struct NotesRoomView: View {
                     .onDelete { indices in
                         indices.forEach { index in
                             let note = filteredNotes[index]
+                            if selectedNote?.id == note.id { selectedNote = nil }
                             vault.notes.removeAll { $0.id == note.id }
                             vault.saveAllData()
                         }
@@ -2321,7 +2512,10 @@ struct NotesRoomView: View {
             .background(vault.theme.paper)
             
             if let note = selectedNote {
-                NoteEditorView(note: note, showPreview: $showPreview)
+                NoteEditorView(note: note, showPreview: $showPreview) {
+                    selectedNote = nil
+                }
+                .id(note.id)
             } else {
                 VStack(spacing: 20) {
                     EnsoLogo()
@@ -2371,14 +2565,183 @@ struct NoteListItem: View {
         .padding(.vertical, 10)
         .padding(.horizontal, 16)
         .background(isSelected ? vault.theme.warm : Color.clear)
+        .contextMenu {
+            Button("Delete Note", role: .destructive) {
+                vault.notes.removeAll { $0.id == note.id }
+                vault.saveAllData()
+            }
+        }
     }
 }
 
+// Shared editor controller: keeps a weak handle on the live NSTextView so the
+// toolbar can format at the current selection / caret instead of appending.
+final class EditorController: ObservableObject {
+    weak var textView: NSTextView?
+
+    func apply(_ op: NoteFormat) {
+        guard let tv = textView else { return }
+        let text = tv.string
+        var sel = tv.selectedRange()
+        let lower = min(sel.location, text.count)
+        if lower > text.count { return }
+
+        switch op {
+        case .bold, .italic, .strikethrough, .inlineCode:
+            wrapSelection(tv, text: text, sel: &sel) { content in
+                switch op {
+                case .bold: return ("**" + content + "**")
+                case .italic: return ("_" + content + "_")
+                case .strikethrough: return ("~~" + content + "~~")
+                default: return ("`" + content + "`")
+                }
+            }
+
+        case .heading1, .heading2:
+            blockPrefix(tv, text: text, sel: &sel, marker: op == .heading1 ? "# " : "## ")
+
+        case .bullet:
+            blockPrefix(tv, text: text, sel: &sel, marker: "- ")
+
+        case .numbered:
+            blockPrefix(tv, text: text, sel: &sel, marker: "1. ")
+
+        case .quote:
+            blockPrefix(tv, text: text, sel: &sel, marker: "> ")
+
+        case .checkbox:
+            blockPrefix(tv, text: text, sel: &sel, marker: "- [ ] ")
+
+        case .codeBlock:
+            wrapSelection(tv, text: text, sel: &sel) { content in
+                "```\n" + content + "\n```"
+            }
+
+        case .link:
+            if sel.length > 0 {
+                let prefix = "["
+                let middle = (text as NSString).substring(with: sel)
+                let url = "](url)"
+                let inserted = prefix + middle + url
+                tv.insertText(inserted, replacementRange: sel)
+                let newLoc = sel.location + prefix.utf16.count + middle.utf16.count + 2
+                tv.setSelectedRange(NSRange(location: newLoc, length: 3))
+            } else {
+                tv.insertText("[](url)", replacementRange: sel)
+                tv.setSelectedRange(NSRange(location: sel.location + 1, length: 0))
+                let urlLoc = sel.location + 2
+                tv.setSelectedRange(NSRange(location: urlLoc, length: 3))
+            }
+
+        case .horizontalRule:
+            tv.insertText("\n---\n", replacementRange: sel)
+        }
+    }
+
+    private func wrapSelection(
+        _ tv: NSTextView, text: String, sel: inout NSRange,
+        transform: (String) -> String
+    ) {
+        if sel.length > 0 {
+            tv.insertText(transform((text as NSString).substring(with: sel)), replacementRange: sel)
+        } else {
+            let placeholder = "text"
+            tv.insertText(transform(placeholder), replacementRange: sel)
+            let idx = sel.location + (placeholder as NSString).length / 2
+            tv.setSelectedRange(NSRange(location: idx, length: placeholder.count))
+        }
+    }
+
+    private func blockPrefix(_ tv: NSTextView, text: String, sel: inout NSRange, marker: String) {
+        let ns = text as NSString
+        var start = sel.location
+        if sel.length > 0 { start = sel.location }
+        guard start <= ns.length else { return }
+        var lineStart = start
+        while lineStart > 0 {
+            let idx = lineStart - 1
+            if idx < ns.length, ns.character(at: idx) == 0x0A { break }
+            lineStart -= 1
+        }
+        tv.insertText(marker, replacementRange: NSRange(location: lineStart, length: 0))
+        tv.setSelectedRange(NSRange(location: start + marker.utf16.count, length: sel.length))
+    }
+}
+
+enum NoteFormat {
+    case bold, italic, strikethrough, inlineCode
+    case heading1, heading2, bullet, numbered, quote, checkbox
+    case codeBlock, link, horizontalRule
+}
+
+struct MarkdownEditorView: NSViewRepresentable {
+    @Binding var text: String
+    let controller: EditorController
+    let textColor: NSColor
+    
+    init(text: Binding<String>, controller: EditorController, textColor: NSColor) {
+        self._text = text
+        self.controller = controller
+        self.textColor = textColor
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSTextView.scrollableTextView()
+        guard let tv = scrollView.documentView as? NSTextView else {
+            return scrollView
+        }
+        tv.delegate = context.coordinator
+        tv.isRichText = false
+        tv.allowsUndo = true
+        tv.font = NSFont.systemFont(ofSize: 14)
+        tv.textColor = textColor
+        tv.drawsBackground = false
+        tv.isAutomaticQuoteSubstitutionEnabled = false
+        tv.isAutomaticDashSubstitutionEnabled = false
+        tv.textContainerInset = NSSize(width: 8, height: 8)
+        tv.string = text
+        controller.textView = tv
+        scrollView.drawsBackground = false
+        return scrollView
+    }
+    
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        guard let tv = scrollView.documentView as? NSTextView else { return }
+        if tv.string != text {
+            let selected = tv.selectedRange()
+            tv.string = text
+            tv.setSelectedRange(NSRange(location: min(selected.location, (text as NSString).length), length: 0))
+        }
+        tv.textColor = textColor
+        controller.textView = tv
+    }
+    
+    class Coordinator: NSObject, NSTextViewDelegate {
+        let parent: MarkdownEditorView
+        init(_ parent: MarkdownEditorView) { self.parent = parent }
+        
+        func textDidChange(_ notification: Notification) {
+            guard let tv = notification.object as? NSTextView else { return }
+            let value = tv.string
+            if value != parent.text {
+                parent.text = value
+            }
+        }
+    }
+}
+
+// MARK: - Note Editor (Obsidian-style markdown formatting + live preview)
 struct NoteEditorView: View {
     @State var note: Note
     @Binding var showPreview: Bool
+    var onDeleted: () -> Void = {}
     @EnvironmentObject var vault: VaultManager
-    
+    @StateObject private var editor = EditorController()
+
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
@@ -2387,80 +2750,89 @@ struct NoteEditorView: View {
                     .textFieldStyle(.plain)
                     .foregroundColor(vault.theme.textPrimary)
                     .onChange(of: note.title) { _, _ in saveNote() }
-                
+
                 Spacer()
-                
-                HStack(spacing: 4) {
-                    FormatButton(icon: "bold", action: { insertFormat("**", "**") })
-                    FormatButton(icon: "italic", action: { insertFormat("_", "_") })
-                    FormatButton(icon: "strikethrough", action: { insertFormat("~~", "~~") })
-                    Divider().frame(height: 16)
-                    FormatButton(icon: "number", action: { insertFormat("### ", "") })
-                    FormatButton(icon: "quote.opening", action: { insertFormat("> ", "") })
-                    Divider().frame(height: 16)
-                    Button(action: { showPreview.toggle() }) {
-                        Image(systemName: showPreview ? "text.alignleft" : "eye")
-                            .font(DesignSystem.font(11))
-                            .foregroundColor(vault.theme.textSecondary)
-                            .padding(6)
-                    }
-                    .buttonStyle(.plain)
+
+                Button(action: { showPreview.toggle() }) {
+                    Image(systemName: showPreview ? "square.and.pencil" : "eye")
+                        .font(DesignSystem.font(12))
+                        .foregroundColor(showPreview ? vault.theme.accent : vault.theme.textSecondary)
+                        .padding(6)
                 }
-                
-                Button(action: { deleteNote() }) {
+                .buttonStyle(.plain)
+                .help(showPreview ? "Back to editor" : "Preview rendered markdown")
+
+                Button(action: deleteNote) {
                     Image(systemName: "trash")
                         .font(DesignSystem.font(12))
                         .foregroundColor(vault.theme.seal)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 8)
-                
+                .help("Delete note")
+
                 Text("Saved \(timeAgo)")
                     .font(DesignSystem.font(10))
                     .foregroundColor(vault.theme.textSecondary.opacity(0.6))
             }
             .padding(.horizontal, 32)
             .padding(.vertical, 16)
-            
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    FormatButton(icon: "textformat.size", action: { editor.apply(.heading1) }, help: "Heading 1", shortcut: .command, key: "1")
+                    FormatButton(icon: "textformat.size.2", action: { editor.apply(.heading2) }, help: "Heading 2", shortcut: .command, key: "2")
+                    Divider().frame(height: 16)
+                    FormatButton(icon: "bold", action: { editor.apply(.bold) }, help: "Bold", shortcut: .command, key: "b")
+                    FormatButton(icon: "italic", action: { editor.apply(.italic) }, help: "Italic", shortcut: .command, key: "i")
+                    FormatButton(icon: "strikethrough", action: { editor.apply(.strikethrough) }, help: "Strikethrough")
+                    FormatButton(icon: "chevron.left.forwardslash.chevron.right", action: { editor.apply(.inlineCode) }, help: "Inline code", shortcut: .command, key: "e")
+                    FormatButton(icon: "quote.opening", action: { editor.apply(.quote) }, help: "Quote")
+                    Divider().frame(height: 16)
+                    FormatButton(icon: "list.bullet", action: { editor.apply(.bullet) }, help: "Bullet list")
+                    FormatButton(icon: "list.number", action: { editor.apply(.numbered) }, help: "Numbered list")
+                    FormatButton(icon: "checklist", action: { editor.apply(.checkbox) }, help: "Checkbox")
+                    Divider().frame(height: 16)
+                    FormatButton(icon: "chevron.left.forwardslash.chevron.right.square", action: { editor.apply(.codeBlock) }, help: "Code block")
+                    FormatButton(icon: "link", action: { editor.apply(.link) }, help: "Link", shortcut: .command, key: "k")
+                    FormatButton(icon: "minus", action: { editor.apply(.horizontalRule) }, help: "Horizontal rule")
+                }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 6)
+            }
+
             Divider().background(vault.theme.divider)
-            
+
             if showPreview {
                 ScrollView {
-                    Text(note.content)
-                        .font(DesignSystem.font(14))
-                        .foregroundColor(vault.theme.textPrimary)
-                        .textSelection(.enabled)
+                    MarkdownPreview(content: note.content)
                         .padding(32)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(vault.theme.background)
                 }
             } else {
-                TextEditor(text: $note.content)
-                    .font(DesignSystem.font(14))
-                    .foregroundColor(vault.theme.textPrimary)
-                    .scrollContentBackground(.hidden)
-                    .padding(32)
-                    .background(ZStack {
-                        vault.theme.background
-                        GridPatternView()
-                    })
-                    .onChange(of: note.content) { _, _ in saveNote() }
+                MarkdownEditorView(
+                    text: $note.content,
+                    controller: editor,
+                    textColor: NSColor(vault.theme.textPrimary)
+                )
+                .padding(24)
+                .background(ZStack {
+                    vault.theme.background
+                    GridPatternView()
+                })
+                .onChange(of: note.content) { _, _ in saveNote() }
             }
         }
         .background(vault.theme.background)
     }
-    
-    func insertFormat(_ prefix: String, _ suffix: String) {
-        note.content += prefix + "text" + suffix + "\n"
-        saveNote()
-    }
-    
+
     var timeAgo: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: note.date, relativeTo: Date())
     }
-    
+
     func saveNote() {
         note.date = Date()
         if let index = vault.notes.firstIndex(where: { $0.id == note.id }) {
@@ -2468,16 +2840,46 @@ struct NoteEditorView: View {
             vault.saveAllData()
         }
     }
-    
+
     func deleteNote() {
         vault.notes.removeAll { $0.id == note.id }
         vault.saveAllData()
+        onDeleted()
+    }
+}
+
+// Renders note markdown (headings, bold, italic, code, lists, quotes, links).
+struct MarkdownPreview: View {
+    let content: String
+
+    var body: some View {
+        let rendered = try? AttributedString(
+            markdown: content,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .full)
+        )
+        Group {
+            if let rendered {
+                Text(rendered)
+                    .font(DesignSystem.font(14))
+                    .foregroundColor(.white.opacity(0.86))
+                    .textSelection(.enabled)
+            } else {
+                Text(content)
+                    .font(DesignSystem.font(14))
+                    .foregroundColor(.white.opacity(0.86))
+                    .textSelection(.enabled)
+            }
+        }
+        .environment(\.colorScheme, .dark)
     }
 }
 
 struct FormatButton: View {
     let icon: String
     let action: () -> Void
+    var help: String = ""
+    var shortcut: EventModifiers? = nil
+    var key: KeyEquivalent = "."
     @EnvironmentObject var vault: VaultManager
     
     var body: some View {
@@ -2486,8 +2888,23 @@ struct FormatButton: View {
                 .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
                 .padding(6)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .help(help)
+        .modifier(ShortcutModifier(shortcut: shortcut, key: key))
+    }
+}
+
+struct ShortcutModifier: ViewModifier {
+    let shortcut: EventModifiers?
+    let key: KeyEquivalent
+    func body(content: Content) -> some View {
+        if let shortcut {
+            content.keyboardShortcut(key, modifiers: shortcut)
+        } else {
+            content
+        }
     }
 }
 
