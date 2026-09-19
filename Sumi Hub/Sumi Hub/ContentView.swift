@@ -1172,6 +1172,31 @@ struct MainAppView: View {
             .animation(.easeInOut(duration: 0.3), value: zenMode)
         }
         .navigationSplitViewStyle(.balanced)
+        .navigationTitle(currentSection == .study ? "Sumi — Focus" : "Sumi — Power User")
+        .toolbar {
+            ToolbarItemGroup(placement: .principal) {
+                Picker("Section", selection: $currentSection) {
+                    Text("Study").tag(ContentView.AppSection.study)
+                    Text("Power User").tag(ContentView.AppSection.powerUser)
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { withAnimation(.easeInOut) { zenMode.toggle() } }) {
+                    Label(zenMode ? "Zen On" : "Zen Off", systemImage: zenMode ? "moon.stars.fill" : "moon")
+                }
+                .help("Toggle Zen Mode")
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showingQuickTimer = true }) {
+                    Label("Quick Timer", systemImage: "timer")
+                }
+                .help("Start a quick focus timer")
+            }
+        }
+        .toolbarBackground(vault.theme.background, for: .windowToolbar)
+        .toolbarBackground(.visible, for: .windowToolbar)
         .sheet(isPresented: $showingQuickTimer) {
             QuickTimerSheet()
                 .frame(width: 400, height: 320)
