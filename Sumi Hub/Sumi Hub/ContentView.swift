@@ -179,38 +179,38 @@ struct ThemeColors {
 // the rest of the file.
 struct DesignSystem {
     // Hairline strokes built from theme ink at low opacity (never heavy boxes).
-    func strokeOpacity(hovering: Bool = false) -> Double { hovering ? 0.14 : 0.07 }
-    func dividerOpacity() -> Double { 0.06 }
+    static func strokeOpacity(hovering: Bool = false) -> Double { hovering ? 0.14 : 0.07 }
+    static func dividerOpacity() -> Double { 0.06 }
 
     // Zen corner languages: calm cards, tighter controls, smallest chips.
-    func radiusCard() -> CGFloat { 12 }
-    func radiusControl() -> CGFloat { 7 }
-    func radiusChip() -> CGFloat { 6 }
-    func radiusSidebar() -> CGFloat { 10 }
+    static func radiusCard() -> CGFloat { 12 }
+    static func radiusControl() -> CGFloat { 7 }
+    static func radiusChip() -> CGFloat { 6 }
+    static func radiusSidebar() -> CGFloat { 10 }
 
     // Breathable 8-pt spacing rhythm — the anti-clutter lever.
-    func spaceXS() -> CGFloat { 6 }
-    func spaceS() -> CGFloat { 10 }
-    func spaceM() -> CGFloat { 16 }
-    func spaceL() -> CGFloat { 24 }
-    func spaceXL() -> CGFloat { 40 }
+    static func spaceXS() -> CGFloat { 6 }
+    static func spaceS() -> CGFloat { 10 }
+    static func spaceM() -> CGFloat { 16 }
+    static func spaceL() -> CGFloat { 24 }
+    static func spaceXL() -> CGFloat { 40 }
 
     // Keep the window airy but not empty.
-    func contentInset() -> CGFloat { 28 }
-    func contentInsetCompact() -> CGFloat { 20 }
+    static func contentInset() -> CGFloat { 28 }
+    static func contentInsetCompact() -> CGFloat { 20 }
 
     // Soft ambient presence — shadow, not weight.
-    func shadowColorOpacity() -> Double { 0.10 }
-    func shadowRadius() -> CGFloat { 10 }
-    func shadowOffsetY() -> CGFloat { 2 }
+    static func shadowColorOpacity() -> Double { 0.10 }
+    static func shadowRadius() -> CGFloat { 10 }
+    static func shadowOffsetY() -> CGFloat { 2 }
 
     // Type scale (tuned, rounded numerals for the zen/data set).
-    func typeHero() -> CGFloat { 30 }
-    func typeTitle() -> CGFloat { 20 }
-    func typeSection() -> CGFloat { 15 }
-    func typeBody() -> CGFloat { 13 }
-    func typeSmall() -> CGFloat { 11 }
-    func typeCaption() -> CGFloat { 9 }
+    static func typeHero() -> CGFloat { 30 }
+    static func typeTitle() -> CGFloat { 20 }
+    static func typeSection() -> CGFloat { 15 }
+    static func typeBody() -> CGFloat { 13 }
+    static func typeSmall() -> CGFloat { 11 }
+    static func typeCaption() -> CGFloat { 9 }
 }
 
 
@@ -1350,6 +1350,75 @@ struct SidebarItem: View {
     }
 }
 
+// MARK: - Focus Hero Portrait (Pass 3 — calm zen hero tile)
+// The single warm surface in the Focus room: today's minutes as tuned serif
+// hero, hairline ink card, soft rice-paper fill. Sister rhythm to the toolbar
+// chip — hero on cream, chip on ink. Pure display, zero state.
+struct FocusHeroTile: View {
+    @EnvironmentObject var vault: VaultManager
+    @EnvironmentObject var timerManager: TimerManager
+
+    var body: some View {
+        HStack(alignment: .lastTextBaseline, spacing: DesignSystem.spaceM()) {
+            VStack(alignment: .leading, spacing: DesignSystem.spaceXS()) {
+                Text("Today")
+                    .font(.system(size: DesignSystem.typeCaption()))
+                    .foregroundColor(vault.theme.textSecondary)
+                HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
+                    Text("\(todayMinutes)")
+                        .font(.system(size: DesignSystem.typeHero(), weight: .light, design: .serif))
+                        .monospacedDigit()
+                        .foregroundColor(vault.theme.textPrimary)
+                    Text("min")
+                        .font(.system(size: DesignSystem.typeBody()))
+                        .foregroundColor(vault.theme.textSecondary)
+                }
+                Text("of \(vault.settings.dailyGoal) min goal")
+                    .font(.system(size: DesignSystem.typeCaption()))
+                    .foregroundColor(vault.theme.textSecondary)
+            }
+
+            Spacer(minLength: DesignSystem.spaceM())
+
+            VStack(alignment: .trailing, spacing: DesignSystem.spaceXS()) {
+                Text("Streak")
+                    .font(.system(size: DesignSystem.typeCaption()))
+                    .foregroundColor(vault.theme.textSecondary)
+                HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
+                    Text("\(vault.getStreak())")
+                        .font(.system(size: DesignSystem.typeBody(), weight: .medium, design: .serif))
+                        .monospacedDigit()
+                        .foregroundColor(vault.theme.accent)
+                    Text("days")
+                        .font(.system(size: DesignSystem.typeCaption()))
+                        .foregroundColor(vault.theme.textSecondary)
+                }
+            }
+        }
+        .padding(DesignSystem.spaceM())
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
+                .fill(vault.theme.background)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radiusCard())
+                .stroke(vault.theme.divider, lineWidth: 1)
+        )
+        .shadow(color: vault.theme.ink.opacity(DesignSystem.shadowColorOpacity()),
+                radius: DesignSystem.shadowRadius(),
+                x: 0,
+                y: DesignSystem.shadowOffsetY())
+    }
+
+    var todayMinutes: Int {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let key = formatter.string(from: Date())
+        return vault.dailyStats[key]?.totalMinutes ?? 0
+    }
+}
+
 // MARK: - Focus Room with Goals
 struct FocusRoomView: View {
     @EnvironmentObject var timerManager: TimerManager
@@ -1360,43 +1429,10 @@ struct FocusRoomView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 40) {
-                HStack(alignment: .top, spacing: 60) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Today")
-                            .font(.system(size: 11))
-                            .foregroundColor(vault.theme.textSecondary)
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text("\(todayMinutes)")
-                                .font(.system(size: 48, weight: .light, design: .serif))
-                                .foregroundColor(vault.theme.textPrimary)
-                            Text("min")
-                                .font(.system(size: 14))
-                                .foregroundColor(vault.theme.textSecondary)
-                        }
-                        Text("of \(vault.settings.dailyGoal) min")
-                            .font(.system(size: 11))
-                            .foregroundColor(vault.theme.textSecondary)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Streak")
-                            .font(.system(size: 11))
-                            .foregroundColor(vault.theme.textSecondary)
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text("\(vault.getStreak())")
-                                .font(.system(size: 48, weight: .light, design: .serif))
-                                .foregroundColor(vault.theme.seal)
-                            Text("days")
-                                .font(.system(size: 14))
-                                .foregroundColor(vault.theme.textSecondary)
-                        }
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 60)
-                .padding(.top, 40)
-                
+                FocusHeroTile()
+                    .padding(.horizontal, 60)
+                    .padding(.top, 40)
+
                 TimerDisplayView()
                     .frame(maxWidth: 500)
                 
