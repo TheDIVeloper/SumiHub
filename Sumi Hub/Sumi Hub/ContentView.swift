@@ -264,7 +264,7 @@ class AudioPlayerManager: ObservableObject {
         let z = noiseSeed
         let h = ((z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9)
         let h2 = ((h ^ (h >> 27)) &* 0x94D049BB133111EB)
-        return Float(Int64(h2 ^ (h2 >> 31))) / Float(Int64.max)
+        return Float(Int64(bitPattern: h2 ^ (h2 >> 31))) / Float(Int64.max)
     }
     
     func playAmbience(named fileName: String, volume: Float) {
@@ -284,7 +284,7 @@ class AudioPlayerManager: ObservableObject {
         
         sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
             guard let self = self,
-                  let ablPointer = audioBufferList.pointee.mBuffers.mData else {
+                  audioBufferList.pointee.mBuffers.mData != nil else {
                 return noErr
             }
             
@@ -314,7 +314,7 @@ class AudioPlayerManager: ObservableObject {
                     self.crackleTimer -= 1.0 / 44100.0
                     var pop: Float = 0
                     if self.crackleTimer <= 0 {
-                        self.nextCrackle = Float.random(in: 0.02...0.9)
+                        self.nextCrackle = 0.02 + 0.88 * abs(self.nextNoise())
                         self.crackleTimer = self.nextCrackle
                         pop = self.nextNoise().magnitude > 0.96 ? 0.7 : 0.0
                     }
