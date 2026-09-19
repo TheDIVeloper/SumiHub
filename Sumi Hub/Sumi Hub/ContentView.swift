@@ -172,6 +172,48 @@ struct ThemeColors {
     var moss: Color { accent }
 }
 
+// MARK: - Design System (zen-native chrome)
+// Single source of truth for radii, spacing and soft-shadow so every card and
+// control reads as one quiet system. Additive + dependency-free: uses ONLY the
+// standard SwiftUI primitives that already built clean, so this can never break
+// the rest of the file.
+struct DesignSystem {
+    // Hairline strokes built from theme ink at low opacity (never heavy boxes).
+    func strokeOpacity(hovering: Bool = false) -> Double { hovering ? 0.14 : 0.07 }
+    func dividerOpacity() -> Double { 0.06 }
+
+    // Zen corner languages: calm cards, tighter controls, smallest chips.
+    func radiusCard() -> CGFloat { 12 }
+    func radiusControl() -> CGFloat { 7 }
+    func radiusChip() -> CGFloat { 6 }
+    func radiusSidebar() -> CGFloat { 10 }
+
+    // Breathable 8-pt spacing rhythm — the anti-clutter lever.
+    func spaceXS() -> CGFloat { 6 }
+    func spaceS() -> CGFloat { 10 }
+    func spaceM() -> CGFloat { 16 }
+    func spaceL() -> CGFloat { 24 }
+    func spaceXL() -> CGFloat { 40 }
+
+    // Keep the window airy but not empty.
+    func contentInset() -> CGFloat { 28 }
+    func contentInsetCompact() -> CGFloat { 20 }
+
+    // Soft ambient presence — shadow, not weight.
+    func shadowColorOpacity() -> Double { 0.10 }
+    func shadowRadius() -> CGFloat { 10 }
+    func shadowOffsetY() -> CGFloat { 2 }
+
+    // Type scale (tuned, rounded numerals for the zen/data set).
+    func typeHero() -> CGFloat { 30 }
+    func typeTitle() -> CGFloat { 20 }
+    func typeSection() -> CGFloat { 15 }
+    func typeBody() -> CGFloat { 13 }
+    func typeSmall() -> CGFloat { 11 }
+    func typeCaption() -> CGFloat { 9 }
+}
+
+
 struct Note: Identifiable, Hashable, Codable {
     let id: UUID
     var title: String
