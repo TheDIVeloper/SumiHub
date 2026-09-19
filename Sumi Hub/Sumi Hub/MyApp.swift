@@ -56,6 +56,7 @@ struct SumiHubApp: App {
         
         Settings {
             SettingsView()
+                .environmentObject(vault)
         }
         
         // Menu Bar Extra
@@ -122,6 +123,7 @@ struct MenuBarView: View {
         .padding(16)
         .frame(width: 250)
         .background(vault.theme.background)
+        .tint(vault.theme.accent)
     }
     
     var todayMinutes: Int {
@@ -136,6 +138,7 @@ struct SettingsView: View {
     @AppStorage("dailyGoal") private var dailyGoal = 120
     @AppStorage("studyMinutes") private var studyMinutes = 50
     @AppStorage("breakMinutes") private var breakMinutes = 10
+    @EnvironmentObject var vault: VaultManager
     
     var body: some View {
         Form {
@@ -147,6 +150,7 @@ struct SettingsView: View {
         }
         .padding(40)
         .frame(width: 500, height: 300)
+        .tint(vault.theme.accent)
     }
 }
 
@@ -154,4 +158,5 @@ extension Notification.Name {
     static let toggleTimer = Notification.Name("toggleTimer")
     static let resetTimer = Notification.Name("resetTimer")
     static let toggleZen = Notification.Name("toggleZen")
+    static let sessionCompleted = Notification.Name("sessionCompleted")
 }

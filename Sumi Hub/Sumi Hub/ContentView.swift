@@ -16,6 +16,7 @@ struct StudySession: Identifiable, Codable, Hashable {
     var mood: Int?
     var appsUsed: [String] = []
     var goals: [FocusGoal] = []
+    var awayMinutes: Int? = nil
     
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
     static func == (lhs: StudySession, rhs: StudySession) -> Bool { lhs.id == rhs.id }
@@ -82,6 +83,10 @@ struct AppSettings: Codable {
     var trackAppUsage: Bool = true
     var blockDistractions: Bool = false
     var blockedApps: [String] = ["Safari", "Mail", "Messages"]
+    var autoContinuePomodoro: Bool = false
+    var breatheGapSeconds: Int = 30
+    var streakMercy: Bool = true
+    var interruptionAware: Bool = true
 }
 
 enum AppTheme: String, Codable, CaseIterable {
@@ -544,6 +549,7 @@ struct WeeklyReview {
     let moodAverage: Double
     let achievements: [String]
     let insights: [String]
+    let letter: String
     
     static func generate(from sessions: [StudySession], stats: [String: DailyStats]) -> WeeklyReview {
         let calendar = Calendar.current
@@ -574,6 +580,14 @@ struct WeeklyReview {
         }
         insights.append("Average mood: \(String(format: "%.1f", moodAverage))/5")
         
+        let letter = Self.composeLetter(
+            totalMinutes: totalMinutes,
+            sessionsCompleted: sessionsCompleted,
+            goalsCompleted: goalsCompleted,
+            topApps: topApps,
+            moodAverage: moodAverage
+        )
+        
         return WeeklyReview(
             weekStart: weekStart,
             totalMinutes: totalMinutes,
@@ -582,8 +596,29 @@ struct WeeklyReview {
             topApps: topApps,
             moodAverage: moodAverage,
             achievements: achievements,
-            insights: insights
+            insights: insights,
+            letter: letter
         )
+    }
+    
+    // A short, honest letter from the practice to its reader.
+    static func composeLetter(totalMinutes: Int, sessionsCompleted: Int, goalsCompleted: Int, topApps: [(String, Int)], moodAverage: Double) -> String {
+        let moodWord: String
+        switch moodAverage {
+        case 4.5...: moodWord = "light"
+        case 3.5..<4.5: moodWord = "steady"
+        case 2.5..<3.5: moodWord = "weathered"
+        default: moodWord = "heavy"
+        }
+        let appLine = topApps.first.map { "You gave your best hours to \($0.0)." } ?? "The hours went somewhere quiet."
+        let pace = sessionsCompleted >= 7 ? "You returned often" : (sessionsCompleted >= 4 ? "You came back a few times" : "You visited rarely")
+        let goalLine = goalsCompleted > 0 ? "\(goalsCompleted) goals were closed." : "No goals closed this week."
+        
+        return """
+        This week you practised.
+        \(totalMinutes) minutes in \(sessionsCompleted) sittings, with a \(moodWord) mood through it. \(pace). \(appLine) \(goalLine)
+        The seal does not judge the streak. It notices the returning.
+        """
     }
 }
 
@@ -610,6 +645,19 @@ class VaultManager: ObservableObject {
         currentTheme.colors
     }
     
+    init() {
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleSessionCompleted(_:)),
+            name: .sessionCompleted, object: nil
+        )
+    }
+
+    @objc private func handleSessionCompleted(_ notification: Notification) {
+        if let session = notification.object as? StudySession {
+            addSession(session)
+        }
+    }
+
     func chooseVaultFolder() -> URL? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
@@ -683,6 +731,27 @@ class VaultManager: ObservableObject {
         }
     }
     
+    func recomputeDailyStats() {
+        var rebuilt: [String: DailyStats] = [:]
+        for session in sessions { updateDailyStatsInto(&rebuilt, session) }
+        dailyStats = rebuilt
+    }
+    
+    private func updateDailyStatsInto(_ into: inout [String: DailyStats], _ session: StudySession) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateKey = formatter.string(from: session.date)
+        if var stats = into[dateKey] {
+            stats.totalMinutes += session.duration
+            stats.sessions.append(session)
+            if let mood = session.mood { stats.mood = mood }
+            stats.completedGoals += session.goals.filter { $0.isCompleted }.count
+            into[dateKey] = stats
+        } else {
+            into[dateKey] = DailyStats(date: dateKey, totalMinutes: session.duration, mood: session.mood ?? 3, sessions: [session])
+        }
+    }
+    
     func setTodayMood(_ mood: Int) {
         todayMood = mood
         let formatter = DateFormatter()
@@ -729,6 +798,42 @@ class VaultManager: ObservableObject {
             } else { break }
         }
         return streak
+    }
+    
+    // Streak mercy (ADR-005, C4): every 7 consecutive focus days earns one freeze;
+    // a missed day consumes a freeze and the count keeps counting. The strict
+    // streak is also exposed for stats.
+    func effectiveStreak() -> Int {
+        guard settings.streakMercy else { return getStreak() }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        var streak = 0
+        var freezes = 0
+        var date = Date()
+        while true {
+            let key = formatter.string(from: date)
+            if let stats = dailyStats[key], stats.totalMinutes > 0 {
+                streak += 1
+                if streak % 7 == 0 { freezes += 1 }
+            } else if freezes > 0 {
+                freezes -= 1
+                streak += 1
+            } else { break }
+            guard let prevDate = Calendar.current.date(byAdding: .day, value: -1, to: date) else { break }
+            date = prevDate
+        }
+        return streak
+    }
+    
+    // Days where the daily goal was met (planned vs actual, C3).
+    func daysAtGoal() -> Int {
+        dailyStats.values.filter { $0.totalMinutes >= settings.dailyGoal }.count
+    }
+    
+    func addNote(title: String, content: String) {
+        let note = Note(id: UUID(), title: title, content: content, date: Date())
+        notes.insert(note, at: 0)
+        saveAllData()
     }
     
     func getTotalHours() -> Double { return Double(sessions.reduce(0) { $0 + $1.duration }) / 60.0 }
@@ -856,6 +961,11 @@ class TimerManager: ObservableObject {
     @Published var appsUsed: [String] = []
     @Published var focusGoals: [FocusGoal] = []
     @Published var breakSuggestion: String = ""
+    @Published var sessionLength: Int = 25 * 60
+    @Published var awaySeconds: Int = 0
+    @Published var awayApp: String?
+    @Published var isBreathing = false
+    @Published var breatheRemaining = 0
     var quotePool: [Quote] = []
     
     init() {
@@ -868,7 +978,9 @@ class TimerManager: ObservableObject {
     
     private var timer: Timer?
     private var quoteTimer: Timer?
+    private var breatheTimer: Timer?
     private var appUsageTracker: AppUsageTracker?
+    private var workspaceObserver: NSObjectProtocol?
     
     enum TimerMode {
         case pomodoro, flow
@@ -888,7 +1000,7 @@ class TimerManager: ObservableObject {
     
     var progress: Double {
         if mode == .flow { return 0 }
-        let total = 25 * 60
+        let total = sessionLength
         return Double(total - timeRemaining) / Double(total)
     }
     
@@ -896,42 +1008,70 @@ class TimerManager: ObservableObject {
         mode == .flow ? "Flowing Quietly" : "Breathe In · Study · Breathe Out"
     }
     
+    func syncSessionLength(minutes: Int) {
+        sessionLength = minutes * 60
+        if !isRunning, mode == .pomodoro, timeRemaining == 25 * 60 {
+            timeRemaining = sessionLength
+        }
+    }
+    
     func toggle() {
-        if isRunning { pause() } else { start() }
+        if isBreathing {
+            cancelBreathing()
+            start()
+            return
+        }
+        if isRunning {
+            pause(recordIncomplete: mode == .flow)
+        } else {
+            start()
+        }
     }
     
     func start() {
+        cancelBreathing()
         isRunning = true
         appsUsed = []
+        awaySeconds = 0
+        awayApp = nil
         appUsageTracker = AppUsageTracker()
         generateBreakSuggestion()
+        startAwayTracking()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.tick()
         }
         startQuoteRotation()
     }
     
-    func pause() {
+    func pause(recordIncomplete: Bool = false) {
         isRunning = false
         timer?.invalidate()
         quoteTimer?.invalidate()
+        stopAwayTracking()
         appUsageTracker?.stopTracking()
         if let tracker = appUsageTracker {
             appsUsed = Array(tracker.appUsage.keys)
+        }
+        if recordIncomplete, mode == .flow, totalTime >= 300 {
+            recordSession(duration: totalTime)
+            resetCounters(for: .flow)
         }
     }
     
     func reset() {
         pause()
-        timeRemaining = 25 * 60
+        timeRemaining = sessionLength
         totalTime = 0
         appsUsed = []
         focusGoals = []
+        awaySeconds = 0
+        awayApp = nil
     }
     
     func startQuickTimer(minutes: Int) {
         reset()
         mode = .pomodoro
+        sessionLength = minutes * 60
         timeRemaining = minutes * 60
         start()
     }
@@ -939,11 +1079,111 @@ class TimerManager: ObservableObject {
     private func tick() {
         if mode == .pomodoro {
             if timeRemaining > 0 { timeRemaining -= 1 }
-            else { pause() }
+            else { completePomodoro() }
         } else {
             totalTime += 1
         }
     }
+    
+    // A completed pomodoro: stop, log the session, then breathe before the next.
+    private func completePomodoro() {
+        let duration = sessionLength
+        pause()
+        recordSession(duration: duration)
+        if settingsAutoContinue {
+            startBreathingGap()
+        }
+    }
+    
+    private var settingsAutoContinue: Bool {
+        UserDefaults.standard.bool(forKey: "autoContinuePomodoro")
+    }
+    
+    private func startBreathingGap() {
+        isBreathing = true
+        breatheRemaining = UserDefaults.standard.integer(forKey: "breatheGapSeconds") > 0
+            ? UserDefaults.standard.integer(forKey: "breatheGapSeconds")
+            : 30
+        breatheTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            self.breatheRemaining -= 1
+            if self.breatheRemaining <= 0 {
+                self.breatheRemaining = 0
+                self.cancelBreathing()
+                self.start()
+            }
+        }
+    }
+    
+    private func cancelBreathing() {
+        isBreathing = false
+        breatheRemaining = 0
+        breatheTimer?.invalidate()
+        breatheTimer = nil
+    }
+    
+    private func resetCounters(for mode: TimerMode) {
+        if mode == .flow { totalTime = 0 }
+    }
+    
+    // A completed (or meaningfully progressed) session is logged to the vault.
+    private func recordSession(duration: Int) {
+        guard duration >= 60 else { return }
+        let minutes = duration / 60
+        let session = StudySession(
+            id: UUID(),
+            subject: subject,
+            duration: minutes,
+            date: Date(),
+            type: mode == .pomodoro ? "pomodoro" : "flow",
+            mood: nil,
+            appsUsed: appsUsed,
+            goals: focusGoals,
+            awayMinutes: awaySeconds > 0 ? awaySeconds / 60 : nil
+        )
+        NotificationCenter.default.post(name: .sessionCompleted, object: session)
+    }
+    
+    // C1 — notice when the user switches to a non-Sumi app mid-focus. Uses only
+    // the "active app changed" notification (no screen content, no permission).
+    private func startAwayTracking() {
+        awaySeconds = 0
+        awayApp = nil
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil, queue: .main
+        ) { [weak self] notification in
+            guard let self, self.isRunning else { return }
+            guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                  let name = app.localizedName,
+                  app.bundleIdentifier != Bundle.main.bundleIdentifier,
+                  name != "Finder"
+            else { return }
+            self.awayApp = name
+        }
+        awayTrackingTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self, self.isRunning else { return }
+            if let app = self.awayApp, self.isAppFrontmost(appName: app) {
+                self.awaySeconds += 1
+            }
+        }
+    }
+    
+    private func isAppFrontmost(appName: String) -> Bool {
+        NSWorkspace.shared.frontmostApplication?.localizedName == appName
+    }
+    
+    private func stopAwayTracking() {
+        if let observer = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
+        workspaceObserver = nil
+        awayTrackingTimer?.invalidate()
+        awayTrackingTimer = nil
+        awayApp = nil
+    }
+    
+    private var awayTrackingTimer: Timer?
     
     private func startQuoteRotation() {
         quoteTimer?.invalidate()
@@ -959,7 +1199,7 @@ class TimerManager: ObservableObject {
     }
     
     func generateBreakSuggestion() {
-        let suggestions = [
+        let base = [
             "Take a 5-minute walk outside",
             "Do some stretching exercises",
             "Practice deep breathing for 2 minutes",
@@ -969,7 +1209,7 @@ class TimerManager: ObservableObject {
             "Meditate for 3 minutes",
             "Write down three things you're grateful for"
         ]
-        breakSuggestion = suggestions.randomElement() ?? "Take a short break"
+        breakSuggestion = base.randomElement() ?? "Take a short break"
     }
     
     func addGoal(_ goal: FocusGoal) {
@@ -1216,7 +1456,9 @@ struct ContentView: View {
     init() {
         NotificationCenter.default.addObserver(forName: .toggleZen, object: nil, queue: .main) { _ in
             let current = UserDefaults.standard.bool(forKey: "zenMode")
-            UserDefaults.standard.set(!current, forKey: "zenMode")
+            withAnimation(.easeInOut) {
+                UserDefaults.standard.set(!current, forKey: "zenMode")
+            }
         }
     }
     
@@ -1265,6 +1507,7 @@ struct ContentView: View {
         }
         .frame(minWidth: 1000, minHeight: 650)
         .background(vault.theme.background)
+        .tint(vault.theme.accent)
         .onAppear {
             if hasCompletedSetup && vault.dailyStats.isEmpty == false {
                 let formatter = DateFormatter()
@@ -1287,19 +1530,25 @@ struct MainAppView: View {
     @Binding var showingMenuBarInfo: Bool
     let currentDestinations: [ContentView.Destination]
     @State private var showingQuickTimer = false
-    
+
+    // Zen = the sidebar column collapses entirely (.detailOnly), not just its text.
+    private var columnVisibility: Binding<NavigationSplitViewVisibility> {
+        Binding(
+            get: { zenMode ? .detailOnly : .doubleColumn },
+            set: { _ in }
+        )
+    }
+
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
-            if !zenMode {
-                SidebarView(
-                    selectedDestination: $selectedDestination,
-                    showingQuickTimer: $showingQuickTimer,
-                    showingMenuBarInfo: $showingMenuBarInfo,
-                    currentDestinations: currentDestinations
-                )
-                .frame(minWidth: 200, idealWidth: 220, maxWidth: 260)
-                .transition(.move(edge: .leading))
-            }
+        NavigationSplitView(columnVisibility: columnVisibility) {
+            SidebarView(
+                selectedDestination: $selectedDestination,
+                showingQuickTimer: $showingQuickTimer,
+                showingMenuBarInfo: $showingMenuBarInfo,
+                currentDestinations: currentDestinations
+            )
+            .frame(minWidth: 200, idealWidth: 220, maxWidth: 260)
+            .transition(.move(edge: .leading))
         } detail: {
             ZStack {
                 vault.theme.background.ignoresSafeArea()
@@ -1509,7 +1758,7 @@ struct FocusHeroTile: View {
                         .kerning(0.6)
                         .foregroundColor(vault.theme.textSecondary)
                     HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
-                        Text("\(vault.getStreak())")
+                        Text("\(vault.effectiveStreak())")
                             .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeTitle(), weight: .semibold))
                             .monospacedDigit()
                             .foregroundColor(vault.theme.accent)
@@ -1520,7 +1769,7 @@ struct FocusHeroTile: View {
                 }
             }
 
-            BranchView(streak: vault.getStreak(), theme: vault.theme)
+            BranchView(streak: vault.effectiveStreak(), theme: vault.theme)
 
             MoodDotsRow(theme: vault.theme)
         }
@@ -1831,23 +2080,51 @@ struct TimerDisplayView: View {
                     .animation(.linear(duration: 1), value: timerManager.progress)
 
                 VStack(spacing: 10) {
-                    Text(timerManager.formattedTime)
-                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeDisplay(), weight: .medium))
-                        .monospacedDigit()
-                        .foregroundColor(vault.theme.textPrimary)
+                    if timerManager.isBreathing {
+                        Text("Breathe. Then on.")
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 22, weight: .medium))
+                            .foregroundColor(vault.theme.textPrimary)
+                        Text("Posture reset · auto-continue in \(timerManager.breatheRemaining)s")
+                            .font(DesignSystem.font(DesignSystem.typeSmall()))
+                            .foregroundColor(vault.theme.textSecondary)
+                    } else {
+                        Text(timerManager.formattedTime)
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeDisplay(), weight: .medium))
+                            .monospacedDigit()
+                            .foregroundColor(vault.theme.textPrimary)
 
-                    Text(timerManager.statusText)
-                        .font(DesignSystem.font(DesignSystem.typeSmall()))
+                        Text(timerManager.statusText)
+                            .font(DesignSystem.font(DesignSystem.typeSmall()))
+                            .foregroundColor(vault.theme.textSecondary)
+                    }
+                }
+            }
+
+            if vault.settings.interruptionAware, timerManager.isRunning, let away = timerManager.awayApp, timerManager.awaySeconds > 3 {
+                HStack(spacing: 6) {
+                    Image(systemName: "leaf")
+                        .font(DesignSystem.font(DesignSystem.typeCaption()))
+                        .foregroundColor(vault.theme.accent)
+                    Text("notice: \(away) for \(timerManager.awaySeconds / 60)m \(timerManager.awaySeconds % 60)s")
+                        .font(DesignSystem.font(DesignSystem.typeCaption()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(vault.theme.card.opacity(0.6))
+                .clipShape(Capsule())
             }
 
             AmbienceSelector()
 
             HStack(spacing: 12) {
                 Button { timerManager.toggle() } label: {
-                    Label(timerManager.isRunning ? "Pause" : "Begin",
-                          systemImage: timerManager.isRunning ? "pause.fill" : "play.fill")
+                    if timerManager.isBreathing {
+                        Label("Skip", systemImage: "forward.fill")
+                    } else {
+                        Label(timerManager.isRunning ? "Pause" : "Begin",
+                              systemImage: timerManager.isRunning ? "pause.fill" : "play.fill")
+                    }
                 }
                 .buttonStyle(PillButtonStyle(theme: vault.theme, prominent: true))
 
@@ -1859,6 +2136,9 @@ struct TimerDisplayView: View {
         }
         .padding(32)
         .surface(vault.theme)
+        .onAppear {
+            timerManager.syncSessionLength(minutes: vault.settings.studyMinutes)
+        }
     }
 }
 
@@ -2022,8 +2302,11 @@ struct MoodCheckInSheet: View {
 
 // MARK: - Stats Room
 struct StatsRoomView: View {
-    @State private var selectedPeriod: StatsPeriod = .week
     @EnvironmentObject var vault: VaultManager
+    @State private var selectedPeriod: StatsPeriod = .week
+    @State private var sessionToRename: StudySession?
+    @State private var renameText = ""
+    let focusTags = ["Focus", "Code", "Deep Work", "Revision", "Creative"]
     
     enum StatsPeriod: String, CaseIterable {
         case day = "Day"
@@ -2086,6 +2369,18 @@ struct StatsRoomView: View {
                             .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                     }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Days at Goal")
+                            .font(DesignSystem.font(11))
+                            .foregroundColor(vault.theme.textSecondary)
+                        Text("\(vault.daysAtGoal())")
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 36, weight: .light))
+                            .foregroundColor(vault.theme.accent)
+                        Text("target \(vault.settings.dailyGoal) min/day")
+                            .font(DesignSystem.font(11))
+                            .foregroundColor(vault.theme.textSecondary)
+                    }
                     
                     Spacer()
                 }
@@ -2123,6 +2418,19 @@ struct StatsRoomView: View {
                         ForEach(0..<7) { day in WeeklyBar(day: day) }
                     }
                     .frame(height: 140)
+                    .overlay(alignment: .bottom) {
+                        let goalPx = min(CGFloat(vault.settings.dailyGoal) / 120.0, 1.0) * 120
+                        Rectangle()
+                            .fill(vault.theme.accent.opacity(0.4))
+                            .frame(height: 1)
+                            .frame(maxWidth: .infinity)
+                            .offset(y: -min(goalPx, 120))
+                    }
+
+                    Text("thin rule = daily goal (\(vault.settings.dailyGoal) min)")
+                        .font(DesignSystem.font(10))
+                        .foregroundColor(vault.theme.textSecondary.opacity(0.7))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .padding(.horizontal, 60)
                 
@@ -2140,10 +2448,93 @@ struct StatsRoomView: View {
                     }
                 }
                 .padding(.horizontal, 60)
-                
+
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Sessions")
+                        .font(DesignSystem.font(11))
+                        .foregroundColor(vault.theme.textSecondary)
+
+                    if vault.sessions.isEmpty {
+                        Text("No sessions yet. Complete a pomodoro or import a CSV and they will line up here.")
+                            .font(DesignSystem.font(12))
+                            .foregroundColor(vault.theme.textSecondary)
+                            .padding(.vertical, 6)
+                    } else {
+                        ForEach(vault.sessions.prefix(25)) { session in
+                            HStack(spacing: 12) {
+                                Text(session.subject)
+                                    .font(DesignSystem.font(12))
+                                    .foregroundColor(vault.theme.textPrimary)
+                                    .lineLimit(1)
+                                if let away = session.awayMinutes, away > 0 {
+                                    Text("strayed \(away)m")
+                                        .font(DesignSystem.font(10))
+                                        .foregroundColor(vault.theme.accent)
+                                }
+                                Spacer()
+                                Text("\(session.duration)m")
+                                    .font(DesignSystem.font(12, weight: .medium))
+                                    .foregroundColor(vault.theme.textPrimary)
+                                    .monospacedDigit()
+                                Text(sessionDate(session.date))
+                                    .font(DesignSystem.font(11))
+                                    .foregroundColor(vault.theme.textSecondary)
+                            }
+                            .padding(.vertical, 6)
+                            .contextMenu {
+                                Button("Rename…") {
+                                    sessionToRename = session
+                                    renameText = session.subject
+                                }
+                                Divider()
+                                ForEach(focusTags, id: \.self) { tag in
+                                    Button("Tag \"\(tag)\"") {
+                                        renameSession(session, to: tag)
+                                    }
+                                }
+                                Divider()
+                                Button("Delete Entry", role: .destructive) {
+                                    if let idx = vault.sessions.firstIndex(where: { $0.id == session.id }) {
+                                        vault.sessions.remove(at: idx)
+                                        vault.saveAllData()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 60)
+
                 Spacer(minLength: 60)
             }
         }
+        .alert("Rename Session", isPresented: Binding(
+            get: { sessionToRename != nil },
+            set: { if !$0 { sessionToRename = nil } }
+        )) {
+            TextField("Subject", text: $renameText)
+            Button("Rename") {
+                if let session = sessionToRename {
+                    renameSession(session, to: renameText)
+                }
+                sessionToRename = nil
+            }
+            Button("Cancel", role: .cancel) { sessionToRename = nil }
+        }
+    }
+
+    func renameSession(_ session: StudySession, to subject: String) {
+        guard !subject.isEmpty,
+              let idx = vault.sessions.firstIndex(where: { $0.id == session.id }) else { return }
+        vault.sessions[idx].subject = subject
+        vault.recomputeDailyStats()
+        vault.saveAllData()
+    }
+
+    func sessionDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, MMM d"
+        return formatter.string(from: date)
     }
     
     var totalHours: Int { Int(vault.getTotalHours()) }
@@ -2347,6 +2738,35 @@ struct WeeklyReviewView: View {
                 
                 if let review = currentReview {
                     VStack(alignment: .leading, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("The Week, In a Letter")
+                                    .font(DesignSystem.font(12, weight: .medium))
+                                    .foregroundColor(vault.theme.textSecondary)
+                                    .kerning(0.6)
+                                Spacer()
+                                Button {
+                                    let dateFormatter = DateFormatter()
+                                    dateFormatter.dateStyle = .medium
+                                    vault.addNote(
+                                        title: "Weekly Review — \(dateFormatter.string(from: review.weekStart))",
+                                        content: review.letter
+                                    )
+                                } label: {
+                                    Label("Save to Notes", systemImage: "square.and.arrow.down")
+                                }
+                                .buttonStyle(PillButtonStyle(theme: vault.theme, prominent: false))
+                            }
+                            Text(review.letter)
+                                .font(DesignSystem.displayFont(serif: true, size: 19, weight: .regular))
+                                .italic()
+                                .foregroundColor(vault.theme.textPrimary)
+                                .lineSpacing(6)
+                        }
+                        .padding(20)
+                        .background(vault.theme.card)
+                        .cornerRadius(8)
+                        
                         HStack(spacing: 40) {
                             StatCard(title: "Total Time", value: "\(review.totalMinutes / 60)h \(review.totalMinutes % 60)m")
                             StatCard(title: "Sessions", value: "\(review.sessionsCompleted)")
@@ -2678,11 +3098,13 @@ struct MarkdownEditorView: NSViewRepresentable {
     @Binding var text: String
     let controller: EditorController
     let textColor: NSColor
+    let selectionColor: NSColor
     
-    init(text: Binding<String>, controller: EditorController, textColor: NSColor) {
+    init(text: Binding<String>, controller: EditorController, textColor: NSColor, selectionColor: NSColor) {
         self._text = text
         self.controller = controller
         self.textColor = textColor
+        self.selectionColor = selectionColor
     }
     
     func makeCoordinator() -> Coordinator {
@@ -2699,6 +3121,11 @@ struct MarkdownEditorView: NSViewRepresentable {
         tv.allowsUndo = true
         tv.font = NSFont.systemFont(ofSize: 14)
         tv.textColor = textColor
+        tv.insertionPointColor = textColor
+        tv.selectedTextAttributes = [
+            .backgroundColor: selectionColor,
+            .foregroundColor: textColor
+        ]
         tv.drawsBackground = false
         tv.isAutomaticQuoteSubstitutionEnabled = false
         tv.isAutomaticDashSubstitutionEnabled = false
@@ -2717,6 +3144,11 @@ struct MarkdownEditorView: NSViewRepresentable {
             tv.setSelectedRange(NSRange(location: min(selected.location, (text as NSString).length), length: 0))
         }
         tv.textColor = textColor
+        tv.insertionPointColor = textColor
+        tv.selectedTextAttributes = [
+            .backgroundColor: selectionColor,
+            .foregroundColor: textColor
+        ]
         controller.textView = tv
     }
     
@@ -2814,7 +3246,8 @@ struct NoteEditorView: View {
                 MarkdownEditorView(
                     text: $note.content,
                     controller: editor,
-                    textColor: NSColor(vault.theme.textPrimary)
+                    textColor: NSColor(vault.theme.textPrimary),
+                    selectionColor: NSColor(vault.theme.accent.opacity(0.35))
                 )
                 .padding(24)
                 .background(ZStack {
@@ -3190,6 +3623,11 @@ struct SettingsRoomView: View {
                     SettingRow(title: "Break Duration", value: $vault.settings.breakMinutes, range: 5...30, step: 5, unit: "min")
                     Toggle("Show Quotes During Timer", isOn: $vault.settings.showQuotes)
                         .tint(vault.theme.accent)
+                    Toggle("Auto-Continue After Pomodoro (breathe gap)", isOn: $vault.settings.autoContinuePomodoro)
+                        .tint(vault.theme.accent)
+                    SettingRow(title: "Breathe Gap", value: $vault.settings.breatheGapSeconds, range: 15...90, step: 5, unit: "s")
+                    Toggle("Notice When You Stray (interruption-aware)", isOn: $vault.settings.interruptionAware)
+                        .tint(vault.theme.accent)
                 }
                 .padding(24)
                 .background(vault.theme.card)
@@ -3207,6 +3645,8 @@ struct SettingsRoomView: View {
                     Toggle("Track App Usage", isOn: $vault.settings.trackAppUsage)
                         .tint(vault.theme.accent)
                     Toggle("Block Distractions", isOn: $vault.settings.blockDistractions)
+                        .tint(vault.theme.accent)
+                    Toggle("Streak Mercy (forgive a missed day)", isOn: $vault.settings.streakMercy)
                         .tint(vault.theme.accent)
                 }
                 .padding(24)
