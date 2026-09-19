@@ -1569,7 +1569,7 @@ struct MainAppView: View {
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(vault.theme.warm)
-                                .cornerRadius(4)
+                                .cornerRadius(DesignSystem.radiusChip())
                         }
                         
                         Button(action: { withAnimation(.easeInOut) { zenMode.toggle() } }) {
@@ -1583,7 +1583,7 @@ struct MainAppView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .background(vault.theme.sidebar)
-                            .cornerRadius(6)
+                            .cornerRadius(DesignSystem.radiusChip())
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
@@ -2220,7 +2220,7 @@ struct QuickTimerSheet: View {
                             .foregroundColor(selectedMinutes == mins ? vault.theme.textPrimary : vault.theme.textSecondary)
                             .frame(width: 60, height: 40)
                             .background(selectedMinutes == mins ? vault.theme.warm : Color.clear)
-                            .cornerRadius(6)
+                            .cornerRadius(DesignSystem.radiusChip())
                     }
                     .buttonStyle(.plain)
                 }
@@ -2241,7 +2241,7 @@ struct QuickTimerSheet: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(vault.theme.buttonBackground)
-            .cornerRadius(6)
+            .cornerRadius(DesignSystem.radiusChip())
             
             Button("Cancel") { dismiss() }
                 .font(DesignSystem.font(12))
@@ -2293,7 +2293,7 @@ struct MoodCheckInSheet: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(vault.theme.buttonBackground)
-            .cornerRadius(6)
+            .cornerRadius(DesignSystem.radiusChip())
         }
         .padding(32)
         .background(vault.theme.background)
@@ -2406,7 +2406,7 @@ struct StatsRoomView: View {
                     }
                     .padding(20)
                     .background(vault.theme.card)
-                    .cornerRadius(8)
+                    .cornerRadius(DesignSystem.radiusCard())
                 }
                 
                 VStack(alignment: .leading, spacing: 20) {
@@ -2670,7 +2670,7 @@ struct HabitRow: View {
         }
         .padding(16)
         .background(vault.theme.card)
-        .cornerRadius(8)
+        .cornerRadius(DesignSystem.radiusCard())
     }
     
     var isCompletedToday: Bool {
@@ -2765,7 +2765,7 @@ struct WeeklyReviewView: View {
                         }
                         .padding(20)
                         .background(vault.theme.card)
-                        .cornerRadius(8)
+                        .cornerRadius(DesignSystem.radiusCard())
                         
                         HStack(spacing: 40) {
                             StatCard(title: "Total Time", value: "\(review.totalMinutes / 60)h \(review.totalMinutes % 60)m")
@@ -2792,7 +2792,7 @@ struct WeeklyReviewView: View {
                         }
                         .padding(16)
                         .background(vault.theme.card)
-                        .cornerRadius(8)
+                        .cornerRadius(DesignSystem.radiusCard())
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Achievements")
@@ -2811,7 +2811,7 @@ struct WeeklyReviewView: View {
                         }
                         .padding(16)
                         .background(vault.theme.card)
-                        .cornerRadius(8)
+                        .cornerRadius(DesignSystem.radiusCard())
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Insights")
@@ -2825,7 +2825,7 @@ struct WeeklyReviewView: View {
                         }
                         .padding(16)
                         .background(vault.theme.card)
-                        .cornerRadius(8)
+                        .cornerRadius(DesignSystem.radiusCard())
                     }
                     .padding(.horizontal, 60)
                 } else {
@@ -2858,7 +2858,7 @@ struct StatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(vault.theme.card)
-        .cornerRadius(8)
+        .cornerRadius(DesignSystem.radiusCard())
     }
 }
 
@@ -3382,7 +3382,7 @@ struct NewNoteSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 10)
                 .background(vault.theme.buttonBackground)
-                .cornerRadius(6)
+                .cornerRadius(DesignSystem.radiusChip())
             }
         }
         .padding(32)
@@ -3574,7 +3574,7 @@ struct AddEventSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 10)
                 .background(vault.theme.buttonBackground)
-                .cornerRadius(6)
+                .cornerRadius(DesignSystem.radiusChip())
             }
             .padding(.horizontal, 20)
         }
@@ -3611,7 +3611,7 @@ struct SettingsRoomView: View {
                 }
                 .padding(24)
                 .background(vault.theme.card)
-                .cornerRadius(8)
+                .cornerRadius(DesignSystem.radiusCard())
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Timer")
@@ -3631,7 +3631,7 @@ struct SettingsRoomView: View {
                 }
                 .padding(24)
                 .background(vault.theme.card)
-                .cornerRadius(8)
+                .cornerRadius(DesignSystem.radiusCard())
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Integrations")
@@ -3651,7 +3651,7 @@ struct SettingsRoomView: View {
                 }
                 .padding(24)
                 .background(vault.theme.card)
-                .cornerRadius(8)
+                .cornerRadius(DesignSystem.radiusCard())
                 
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Vault & Data")
@@ -3698,7 +3698,7 @@ struct SettingsRoomView: View {
                 }
                 .padding(24)
                 .background(vault.theme.card)
-                .cornerRadius(8)
+                .cornerRadius(DesignSystem.radiusCard())
                 
                 Spacer(minLength: 60)
             }
@@ -3764,7 +3764,7 @@ struct OnboardingView: View {
                     .padding(.horizontal, 28)
                     .padding(.vertical, 12)
                     .background(vault.theme.buttonBackground)
-                    .cornerRadius(6)
+                    .cornerRadius(DesignSystem.radiusChip())
                 }
                 .padding(60)
             } else {
@@ -3784,7 +3784,7 @@ struct OnboardingView: View {
                         .padding(.horizontal, 28)
                         .padding(.vertical, 12)
                         .background(vault.theme.buttonBackground)
-                        .cornerRadius(6)
+                        .cornerRadius(DesignSystem.radiusChip())
                 }
                 .padding(60)
             }
