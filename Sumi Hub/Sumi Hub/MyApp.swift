@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import UserNotifications
+import CoreText
 
 @main
 struct SumiHubApp: App {
@@ -9,6 +10,19 @@ struct SumiHubApp: App {
     @StateObject private var timerManager = TimerManager()
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    init() {
+        registerBundledFonts()
+    }
+    
+    // Shippori Mincho (OFL 1.1) ships inside the bundle (Sumi Hub/Fonts) and is
+    // registered process-wide at launch so Font.custom("ShipporiMincho-…") works.
+    private func registerBundledFonts() {
+        guard let urls = Bundle.main.urls(forResourcesWithExtension: "ttf", subdirectory: nil) else { return }
+        for url in urls {
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -82,7 +96,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(timerManager.formattedTime)
-                    .font(.system(size: 24, weight: .light, design: .serif))
+                    .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 24, weight: .light))
                     .foregroundColor(vault.theme.textPrimary) // Fixed white text
                 Spacer()
                 Button(action: { timerManager.toggle() }) {

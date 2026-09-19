@@ -76,7 +76,7 @@ struct AppSettings: Codable {
     var ambience: String = "none"
     var ambienceVolume: Double = 0.5
     var showQuotes: Bool = true
-    var theme: AppTheme = .light
+    var theme: AppTheme = .sumi
     var calendarIntegration: Bool = false
     var silenceNotifications: Bool = true
     var trackAppUsage: Bool = true
@@ -85,27 +85,19 @@ struct AppSettings: Codable {
 }
 
 enum AppTheme: String, Codable, CaseIterable {
-    case light = "Light"
     case dark = "Dark"
-    case sepia = "Sepia"
-    case highContrast = "High Contrast"
+    case sumi = "Sumi"
+    
+    // Old Light/Sepia/H. Contrast saved values fold to Sumi instead of failing
+    // the whole settings file decode (ADR-004).
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        self = AppTheme(rawValue: value) ?? .sumi
+    }
     
     var colors: ThemeColors {
         switch self {
-        case .light:
-            return ThemeColors(
-                background: Color(red: 0.933, green: 0.902, blue: 0.867),
-                sidebar: Color(red: 0.902, green: 0.859, blue: 0.820),
-                card: Color(red: 0.863, green: 0.827, blue: 0.796),
-                textPrimary: Color(red: 0.341, green: 0.322, blue: 0.475),
-                textSecondary: Color(red: 0.380, green: 0.361, blue: 0.518),
-                accent: Color(red: 0.533, green: 0.373, blue: 0.306),
-                seal: Color(red: 0.839, green: 0.506, blue: 0.490),
-                divider: Color(red: 0.867, green: 0.816, blue: 0.776),
-                warm: Color(red: 0.916, green: 0.831, blue: 0.799),
-                buttonBackground: Color(red: 0.533, green: 0.373, blue: 0.306),
-                buttonText: Color(red: 0.976, green: 0.961, blue: 0.941)
-            )
         case .dark:
             return ThemeColors(
                 background: Color(red: 0.118, green: 0.118, blue: 0.180),
@@ -120,34 +112,24 @@ enum AppTheme: String, Codable, CaseIterable {
                 buttonBackground: Color(red: 0.533, green: 0.373, blue: 0.306),
                 buttonText: Color(red: 0.933, green: 0.902, blue: 0.867)
             )
-        case .sepia:
-            return ThemeColors(
-                background: Color(red: 0.906, green: 0.871, blue: 0.820),
-                sidebar: Color(red: 0.871, green: 0.820, blue: 0.753),
-                card: Color(red: 0.835, green: 0.776, blue: 0.686),
-                textPrimary: Color(red: 0.353, green: 0.337, blue: 0.439),
-                textSecondary: Color(red: 0.408, green: 0.384, blue: 0.463),
-                accent: Color(red: 0.478, green: 0.318, blue: 0.263),
-                seal: Color(red: 0.816, green: 0.478, blue: 0.459),
-                divider: Color(red: 0.827, green: 0.769, blue: 0.698),
-                warm: Color(red: 0.894, green: 0.805, blue: 0.760),
-                buttonBackground: Color(red: 0.478, green: 0.318, blue: 0.263),
-                buttonText: Color(red: 0.949, green: 0.937, blue: 0.918)
+        case .sumi:
+            // Web app look (app/index.html): moss + rust on warm ink, serif
+            // display type, halo ring. Palette lifted verbatim from the site CSS.
+            var colors = ThemeColors(
+                background: Color(red: 0.086, green: 0.090, blue: 0.078),
+                sidebar: Color(red: 0.063, green: 0.067, blue: 0.063),
+                card: Color(red: 0.118, green: 0.122, blue: 0.102),
+                textPrimary: Color(red: 0.906, green: 0.886, blue: 0.831),
+                textSecondary: Color(red: 0.561, green: 0.541, blue: 0.471),
+                accent: Color(red: 0.592, green: 0.663, blue: 0.549),
+                seal: Color(red: 0.831, green: 0.412, blue: 0.290),
+                divider: Color(red: 0.200, green: 0.204, blue: 0.169),
+                warm: Color(red: 0.129, green: 0.110, blue: 0.090),
+                buttonBackground: Color(red: 0.906, green: 0.886, blue: 0.831),
+                buttonText: Color(red: 0.086, green: 0.090, blue: 0.078)
             )
-        case .highContrast:
-            return ThemeColors(
-                background: Color(red: 0.980, green: 0.969, blue: 0.949),
-                sidebar: Color(red: 0.925, green: 0.894, blue: 0.855),
-                card: Color(red: 0.996, green: 0.992, blue: 0.984),
-                textPrimary: Color(red: 0.118, green: 0.098, blue: 0.180),
-                textSecondary: Color(red: 0.294, green: 0.275, blue: 0.380),
-                accent: Color(red: 0.427, green: 0.286, blue: 0.224),
-                seal: Color(red: 0.741, green: 0.380, blue: 0.353),
-                divider: Color(red: 0.761, green: 0.714, blue: 0.663),
-                warm: Color(red: 0.941, green: 0.886, blue: 0.867),
-                buttonBackground: Color(red: 0.255, green: 0.180, blue: 0.145),
-                buttonText: Color(red: 0.992, green: 0.988, blue: 0.976)
-            )
+            colors.serifDisplay = true
+            return colors
         }
     }
 }
@@ -164,6 +146,9 @@ struct ThemeColors {
     let warm: Color
     let buttonBackground: Color
     let buttonText: Color
+    // Sumi-only flourish (ADR-004): display type becomes Shippori Mincho. Dark
+    // and any future theme keep Atkinson everywhere.
+    var serifDisplay: Bool = false
     
     var paper: Color { background }
     var paperDark: Color { sidebar }
@@ -233,6 +218,28 @@ struct DesignSystem {
             name = "AtkinsonHyperlegibleNext-ExtraBold"
         default:
             name = "AtkinsonHyperlegibleNext-Regular"
+        }
+        return Font.custom(name, size: size)
+    }
+
+    // Display type — Shippori Mincho (bundled, OFL) when the theme opts into
+    // serif display (Sumi, ADR-004), else Atkinson for everything. Only the
+    // closest Mincho cut exists per request; unknown weights fold up, never
+    // try to load a missing PostScript name.
+    static func displayFont(serif: Bool, size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        guard serif else { return font(size, weight: weight) }
+        let name: String
+        switch weight {
+        case .ultraLight, .thin, .light, .regular:
+            name = "ShipporiMincho-Medium"
+        case .medium:
+            name = "ShipporiMincho-Medium"
+        case .semibold:
+            name = "ShipporiMincho-SemiBold"
+        case .bold, .heavy, .black:
+            name = "ShipporiMincho-Bold"
+        default:
+            name = "ShipporiMincho-Medium"
         }
         return Font.custom(name, size: size)
     }
@@ -601,7 +608,7 @@ class VaultManager: ObservableObject {
     @Published var schedule: [ScheduleEvent] = []
     @Published var habits: [Habit] = []
     @Published var todayMood: Int = 3
-    @Published var currentTheme: AppTheme = .light
+    @Published var currentTheme: AppTheme = .sumi
     
     let appUsageTracker = AppUsageTracker()
     let calendarManager = CalendarManager()
@@ -1041,16 +1048,16 @@ struct GridPatternView: View {
 
 // MARK: - Zen Theme
 struct Zen {
-    static var paper: Color { AppTheme.light.colors.background }
-    static var paperDark: Color { AppTheme.light.colors.sidebar }
-    static var ink: Color { AppTheme.light.colors.textPrimary }
-    static var inkLight: Color { AppTheme.light.colors.textSecondary }
-    static var moss: Color { AppTheme.light.colors.accent }
-    static var seal: Color { AppTheme.light.colors.seal }
-    static var divider: Color { AppTheme.light.colors.divider }
-    static var warm: Color { AppTheme.light.colors.warm }
-    static var buttonBackground: Color { AppTheme.light.colors.buttonBackground }
-    static var buttonText: Color { AppTheme.light.colors.buttonText }
+    static var paper: Color { AppTheme.sumi.colors.background }
+    static var paperDark: Color { AppTheme.sumi.colors.sidebar }
+    static var ink: Color { AppTheme.sumi.colors.textPrimary }
+    static var inkLight: Color { AppTheme.sumi.colors.textSecondary }
+    static var moss: Color { AppTheme.sumi.colors.accent }
+    static var seal: Color { AppTheme.sumi.colors.seal }
+    static var divider: Color { AppTheme.sumi.colors.divider }
+    static var warm: Color { AppTheme.sumi.colors.warm }
+    static var buttonBackground: Color { AppTheme.sumi.colors.buttonBackground }
+    static var buttonText: Color { AppTheme.sumi.colors.buttonText }
 }
 
 // MARK: - Custom Segmented Picker
@@ -1400,7 +1407,7 @@ struct FocusHeroTile: View {
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(todayMinutes)")
-                        .font(DesignSystem.font(DesignSystem.typeHero(), weight: .medium))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeHero(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
                     Text("min")
@@ -1421,7 +1428,7 @@ struct FocusHeroTile: View {
                     .foregroundColor(vault.theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spaceXS()) {
                     Text("\(vault.getStreak())")
-                        .font(DesignSystem.font(DesignSystem.typeTitle(), weight: .semibold))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeTitle(), weight: .semibold))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.accent)
                     Text("days")
@@ -1518,8 +1525,8 @@ struct FocusRoomView: View {
                 if vault.settings.showQuotes, let quote = timerManager.currentQuote {
                     VStack(spacing: 6) {
                         Text("\"\(quote.text)\"")
-                            .font(DesignSystem.font(DesignSystem.typeSection()))
-                            .italic()
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeSection(), weight: .regular))
+                            .italic(!vault.theme.serifDisplay)
                             .foregroundColor(vault.theme.textSecondary)
                             .multilineTextAlignment(.center)
                         Text(quote.author.uppercased())
@@ -1600,7 +1607,8 @@ struct AddGoalSheet: View {
 struct TimerDisplayView: View {
     @EnvironmentObject var timerManager: TimerManager
     @EnvironmentObject var vault: VaultManager
-    
+    @State private var haloPulse = false
+
     var body: some View {
         VStack(spacing: 28) {
             ZenSegmentedPicker(
@@ -1621,9 +1629,19 @@ struct TimerDisplayView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: timerManager.progress)
 
+                if vault.theme.serifDisplay {
+                    Circle()
+                        .stroke(vault.theme.accent.opacity(0.22), lineWidth: 1)
+                        .frame(width: 296, height: 296)
+                        .scaleEffect(haloPulse ? 1.05 : 1.0)
+                        .opacity(timerManager.isRunning ? (haloPulse ? 0.5 : 0.2) : 0.0)
+                        .animation(.easeInOut(duration: 3.2).repeatForever(autoreverses: true), value: haloPulse)
+                        .allowsHitTesting(false)
+                }
+
                 VStack(spacing: 10) {
                     Text(timerManager.formattedTime)
-                        .font(DesignSystem.font(DesignSystem.typeDisplay(), weight: .medium))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: DesignSystem.typeDisplay(), weight: .medium))
                         .monospacedDigit()
                         .foregroundColor(vault.theme.textPrimary)
 
@@ -1631,6 +1649,9 @@ struct TimerDisplayView: View {
                         .font(DesignSystem.font(DesignSystem.typeSmall()))
                         .foregroundColor(vault.theme.textSecondary)
                 }
+            }
+            .onAppear {
+                haloPulse = true
             }
 
             AmbienceSelector()
@@ -1828,7 +1849,7 @@ struct StatsRoomView: View {
             VStack(alignment: .leading, spacing: 48) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Your Practice")
-                        .font(DesignSystem.font(32, weight: .light))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     
@@ -1859,7 +1880,7 @@ struct StatsRoomView: View {
                             .font(DesignSystem.font(11))
                             .foregroundColor(vault.theme.textSecondary)
                         Text("\(totalHours)h \(totalMinutes)m")
-                            .font(DesignSystem.font(36, weight: .light))
+                            .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 36, weight: .light))
                             .foregroundColor(vault.theme.textPrimary)
                         Text("This \(selectedPeriod.rawValue.lowercased())")
                             .font(DesignSystem.font(11))
@@ -2003,7 +2024,7 @@ struct HabitsRoomView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Habit Tracker")
-                        .font(DesignSystem.font(32, weight: .light))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button(action: { showingAddHabit = true }) {
@@ -2124,7 +2145,7 @@ struct WeeklyReviewView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Weekly Review")
-                        .font(DesignSystem.font(32, weight: .light))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button("Generate Review") {
@@ -2531,7 +2552,7 @@ struct ScheduleRoomView: View {
             VStack(alignment: .leading, spacing: 32) {
                 HStack {
                     Text("Weekly Rhythm")
-                        .font(DesignSystem.font(32, weight: .light))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 32, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Spacer()
                     Button(action: { showingAddEvent = true }) {
@@ -2721,7 +2742,7 @@ struct SettingsRoomView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
                 Text("Settings")
-                    .font(DesignSystem.font(32, weight: .light))
+                    .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 32, weight: .light))
                     .foregroundColor(vault.theme.textPrimary)
                     .padding(.top, 40)
                 
@@ -2892,7 +2913,7 @@ struct OnboardingView: View {
             } else {
                 VStack(spacing: 24) {
                     Text("You're All Set")
-                        .font(DesignSystem.font(28, weight: .light))
+                        .font(DesignSystem.displayFont(serif: vault.theme.serifDisplay, size: 28, weight: .light))
                         .foregroundColor(vault.theme.textPrimary)
                     Text("Your vault is ready")
                         .font(DesignSystem.font(13))

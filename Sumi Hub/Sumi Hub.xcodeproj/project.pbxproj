@@ -6,8 +6,17 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B0E100000000000000000B02 /* ShipporiMincho-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F0E100000000000000000F02 /* ShipporiMincho-Bold.ttf */; };
+		B0E100000000000000000B03 /* ShipporiMincho-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F0E100000000000000000F03 /* ShipporiMincho-Medium.ttf */; };
+		B0E100000000000000000B04 /* ShipporiMincho-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F0E100000000000000000F04 /* ShipporiMincho-SemiBold.ttf */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Sumi Hub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sumi Hub.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0E100000000000000000F02 /* ShipporiMincho-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ShipporiMincho-Bold.ttf"; sourceTree = "<group>"; };
+		F0E100000000000000000F03 /* ShipporiMincho-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ShipporiMincho-Medium.ttf"; sourceTree = "<group>"; };
+		F0E100000000000000000F04 /* ShipporiMincho-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ShipporiMincho-SemiBold.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -31,8 +40,19 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* Sumi Hub */,
+				F0E100000000000000000F01 /* Fonts */,
 				000000000000000000000020 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		F0E100000000000000000F01 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				F0E100000000000000000F02 /* ShipporiMincho-Bold.ttf */,
+				F0E100000000000000000F03 /* ShipporiMincho-Medium.ttf */,
+				F0E100000000000000000F04 /* ShipporiMincho-SemiBold.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		000000000000000000000020 /* Products */ = {
@@ -102,6 +122,9 @@
 		000000000000000140000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				B0E100000000000000000B04 /* ShipporiMincho-SemiBold.ttf in Resources */,
+				B0E100000000000000000B03 /* ShipporiMincho-Medium.ttf in Resources */,
+				B0E100000000000000000B02 /* ShipporiMincho-Bold.ttf in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
