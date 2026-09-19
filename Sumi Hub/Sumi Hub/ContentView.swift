@@ -547,7 +547,7 @@ class VaultManager: ObservableObject {
     }
     
     func exportCSV() -> URL? {
-        guard let url = vaultURL else { return nil }
+        guard vaultURL != nil else { return nil }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.commaSeparatedText]
         panel.nameFieldStringValue = "sumi_export_\(Date().timeIntervalSince1970).csv"
@@ -871,6 +871,8 @@ struct ContentView: View {
     @State private var selectedDestination: Destination = .focus
     @State private var showingMoodCheckIn = false
     @State private var showingMenuBarInfo = false
+    @EnvironmentObject var vault: VaultManager
+    @EnvironmentObject var timerManager: TimerManager
     
     init() {
         NotificationCenter.default.addObserver(forName: .toggleZen, object: nil, queue: .main) { _ in
