@@ -192,39 +192,141 @@ struct ScheduleEvent: Identifiable, Codable {
 }
 
 // MARK: - Audio Player for Ambience
+// Fully synthesized stereo ambience — AVAudioSourceNode generates PCM on demand at
+// 44.1kHz. No bundled audio files needed. Public API mirrors the original class:
+//   playAmbience(named:volume:), stop(), setVolume(_:)
 class AudioPlayerManager: ObservableObject {
-    private var audioPlayer: AVAudioPlayer?
+    private let engine = AVAudioEngine()
+    private var sourceNode: AVAudioSourceNode?
+    private var currentGain: Float = 0.7
+    private var engineRunning = false
+    private var currentAmbienceKey: String = "none"
+    
+    private let format: AVAudioFormat = {
+        AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
+    }()
+    
+    // Synthesizer state (mutated only inside the render closure; UI never touches these).
+    private var noiseSeed: UInt64 = 0x9E3779B97F4A7C15
+    private var rainLP: Float = 0
+    private var fireRumble: Float = 0
+    private var fireRumble2: Float = 0
+    private var crackleTimer: Float = 0.05
+    private var nextCrackle: Float = 0.05
+    private var focusEarthLP: Float = 0
+    private var focusWavePhase: Float = 0
+    private var fallbackLP: Float = 0
+    
+    private func nextNoise() -> Float {
+        noiseSeed &+= 0x9E3779B97F4A7C15
+        let z = noiseSeed
+        let h = ((z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9)
+        let h2 = ((h ^ (h >> 27)) &* 0x94D049BB133111EB)
+        return Float(Int64(h2 ^ (h2 >> 31))) / Float(Int64.max)
+    }
     
     func playAmbience(named fileName: String, volume: Float) {
-        guard fileName != "none" else {
+        currentGain = volume
+        let key = fileName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard key != "none", key != "" else {
             stop()
             return
         }
+        currentAmbienceKey = key
+        startAmbience(key)
+    }
+    
+    private func startAmbience(_ key: String) {
+        engine.stop()
+        engine.reset()
         
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") else {
-            return
+        sourceNode = AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList -> OSStatus in
+            guard let self = self,
+                  let ablPointer = audioBufferList.pointee.mBuffers.mData else {
+                return noErr
+            }
+            
+            let abl = UnsafeMutableAudioBufferListPointer(audioBufferList)
+            let left = abl[0].mData?.assumingMemoryBound(to: Float.self)
+            let right = abl[1].mData?.assumingMemoryBound(to: Float.self)
+            let gain = self.currentGain
+            let frameCountInt = Int(frameCount)
+            
+            switch key {
+            case "rain":
+                for frame in 0..<frameCountInt {
+                    let n = self.nextNoise()
+                    self.rainLP += 0.015 * (n - self.rainLP)
+                    let droplet: Float = self.nextNoise().magnitude > 0.999 ? 0.6 : 0.0
+                    let s = (self.rainLP * Float(0.5) + droplet) * Float(0.35)
+                    left?[frame] = s * gain
+                    right?[frame] = s * gain
+                }
+            case "fireplace":
+                for frame in 0..<frameCountInt {
+                    let n = self.nextNoise()
+                    self.fireRumble += 0.02 * n
+                    self.fireRumble *= 0.999
+                    self.fireRumble2 += 0.03 * n
+                    self.fireRumble2 *= 0.9995
+                    self.crackleTimer -= 1.0 / 44100.0
+                    var pop: Float = 0
+                    if self.crackleTimer <= 0 {
+                        self.nextCrackle = Float.random(in: 0.02...0.9)
+                        self.crackleTimer = self.nextCrackle
+                        pop = self.nextNoise().magnitude > 0.96 ? 0.7 : 0.0
+                    }
+                    let s = (self.fireRumble * 0.7 + self.fireRumble2 * 0.2 + pop * 0.5) * 0.16
+                    left?[frame] = s * gain
+                    right?[frame] = s * gain
+                }
+            case "deep focus":
+                for frame in 0..<frameCountInt {
+                    let t = Float(frame) / 44100.0
+                    let n = self.nextNoise()
+                    self.focusEarthLP += 0.025 * (n - self.focusEarthLP)
+                    let wave = sin(2 * .pi * 92 * t) * 0.4 + sin(2 * .pi * 110 * t) * 0.2
+                    let s = (self.focusEarthLP * 0.55 + wave * 0.35) * 0.22
+                    left?[frame] = s * gain
+                    right?[frame] = s * gain
+                }
+            default:
+                // Fallback: soft filtered noise bed so ambience is never silent.
+                for frame in 0..<frameCountInt {
+                    let n = self.nextNoise()
+                    self.fallbackLP += 0.02 * (n - self.fallbackLP)
+                    let s = self.fallbackLP * 0.4
+                    left?[frame] = s * gain
+                    right?[frame] = s * gain
+                }
+            }
+            return noErr
         }
         
+        guard let node = sourceNode else { return }
+        engine.attach(node)
+        engine.connect(node, to: engine.mainMixerNode, format: format)
+        engine.prepare()
+        
         do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.volume = volume
-            audioPlayer?.numberOfLoops = -1
-            audioPlayer?.play()
+            try engine.start()
+            engineRunning = true
         } catch {
-            print("Error playing audio: \(error)")
+            print("Error starting ambience engine: \(error)")
         }
     }
     
     func stop() {
-        audioPlayer?.stop()
-        audioPlayer = nil
+        engine.stop()
+        engineRunning = false
+        sourceNode = nil
+        currentAmbienceKey = "none"
     }
     
     func setVolume(_ volume: Float) {
-        audioPlayer?.volume = volume
+        currentGain = volume
     }
 }
-
 // MARK: - App Usage Tracker
 class AppUsageTracker: ObservableObject {
     @Published var currentApp: String = ""
