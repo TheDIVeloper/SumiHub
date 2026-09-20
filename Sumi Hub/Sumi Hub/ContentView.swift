@@ -2899,7 +2899,7 @@ struct NotesRoomView: View {
                 
                 List(selection: $selectedNote) {
                     ForEach(filteredNotes) { note in
-                        NoteListItem(note: note, isSelected: note.id == selectedNote?.id)
+                        NoteListItem(note: note, onSelect: { selectedNote = note }, isSelected: note.id == selectedNote?.id)
                     }
                     .onDelete { indices in
                         indices.forEach { index in
@@ -2913,6 +2913,7 @@ struct NotesRoomView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .background(vault.theme.paper)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 Divider().background(vault.theme.divider)
                 
@@ -2963,20 +2964,23 @@ struct NotesRoomView: View {
 
 struct NoteListItem: View {
     let note: Note
+    var onSelect: () -> Void
     let isSelected: Bool
     @EnvironmentObject var vault: VaultManager
+    @State private var isHovered = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(note.title.isEmpty ? "Untitled" : note.title)
                 .font(DesignSystem.font(13, weight: isSelected ? .medium : .regular))
                 .foregroundColor(vault.theme.textPrimary)
-                .lineLimit(1)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
             
-            Text(note.content.prefix(50))
+            Text(note.content.prefix(80))
                 .font(DesignSystem.font(11))
                 .foregroundColor(vault.theme.textSecondary)
-                .lineLimit(2)
+                .lineLimit(3)
             
             Text(note.date, style: .date)
                 .font(DesignSystem.font(10))
@@ -2984,13 +2988,19 @@ struct NoteListItem: View {
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 16)
-        .background(isSelected ? vault.theme.warm : Color.clear)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            isSelected ? vault.theme.warm :
+            isHovered ? vault.theme.warm.opacity(0.3) : Color.clear
+        )
         .contextMenu {
             Button("Delete Note", role: .destructive) {
                 vault.notes.removeAll { $0.id == note.id }
                 vault.saveAllData()
             }
         }
+        .onTapGesture(perform: onSelect)
+        .onHover { isHovered = $0 }
     }
 }
 
@@ -3055,6 +3065,17 @@ final class EditorController: ObservableObject {
 
         case .horizontalRule:
             tv.insertText("\n---\n", replacementRange: sel)
+        case .underline:
+            let selectedRange = tv.selectedRange()
+            if selectedRange.length > 0 {
+                let selectedText = (text as NSString).substring(with: selectedRange)
+                tv.insertText("<u>" + selectedText + "</u>", replacementRange: selectedRange)
+            } else {
+                let placeholder = "text"
+                tv.insertText("<u>" + placeholder + "</u>", replacementRange: selectedRange)
+                let idx = selectedRange.location + ("<u>" + placeholder + "</u>").count / 2
+                tv.setSelectedRange(NSRange(location: idx, length: ("<u>" + placeholder + "</u>").count))
+            }
         }
     }
 
@@ -3091,7 +3112,7 @@ final class EditorController: ObservableObject {
 enum NoteFormat {
     case bold, italic, strikethrough, inlineCode
     case heading1, heading2, bullet, numbered, quote, checkbox
-    case codeBlock, link, horizontalRule
+    case codeBlock, link, horizontalRule, underline
 }
 
 struct MarkdownEditorView: NSViewRepresentable {
@@ -3117,7 +3138,7 @@ struct MarkdownEditorView: NSViewRepresentable {
             return scrollView
         }
         tv.delegate = context.coordinator
-        tv.isRichText = false
+        tv.isRichText = true
         tv.allowsUndo = true
         tv.font = NSFont.systemFont(ofSize: 14)
         tv.textColor = textColor
@@ -3131,6 +3152,7 @@ struct MarkdownEditorView: NSViewRepresentable {
         tv.isAutomaticDashSubstitutionEnabled = false
         tv.textContainerInset = NSSize(width: 8, height: 8)
         tv.string = text
+        context.coordinator.applyMarkdownAttributes(tv)
         controller.textView = tv
         scrollView.drawsBackground = false
         return scrollView
@@ -3141,6 +3163,7 @@ struct MarkdownEditorView: NSViewRepresentable {
         if tv.string != text {
             let selected = tv.selectedRange()
             tv.string = text
+            context.coordinator.applyMarkdownAttributes(tv)
             tv.setSelectedRange(NSRange(location: min(selected.location, (text as NSString).length), length: 0))
         }
         tv.textColor = textColor
@@ -3160,124 +3183,377 @@ struct MarkdownEditorView: NSViewRepresentable {
             guard let tv = notification.object as? NSTextView else { return }
             let value = tv.string
             if value != parent.text {
+                let selected = tv.selectedRange()
                 parent.text = value
+                applyMarkdownAttributes(tv)
+                tv.setSelectedRange(selected)
+            }
+        }
+        
+        func applyMarkdownAttributes(_ tv: NSTextView) {
+            guard let textStorage = tv.textStorage else { return }
+            let text = tv.string
+            guard !text.isEmpty else { return }
+            let fullRange = NSRange(location: 0, length: (text as NSString).length)
+            guard fullRange.length > 0 else { return }
+            
+            let defaultAttrs: [NSAttributedString.Key: Any] = [
+                .font: NSFont.systemFont(ofSize: 14),
+                .foregroundColor: tv.textColor ?? NSColor.labelColor
+            ]
+            textStorage.setAttributes(defaultAttrs, range: fullRange)
+            
+            let dimmedColor = (tv.textColor ?? NSColor.labelColor).withAlphaComponent(0.4)
+            
+            struct MarkdownPattern {
+                let regex: NSRegularExpression
+                let contentGroup: Int
+                let contentAttrs: [NSAttributedString.Key: Any]
+                let delimiterAttrs: [NSAttributedString.Key: Any]
+            }
+            
+            let baseFont = NSFont.systemFont(ofSize: 14)
+            let dimmed = dimmedColor
+            
+            let configs: [(String, Int, [NSAttributedString.Key: Any], [NSAttributedString.Key: Any])] = [
+                (#"\*\*(.+?)\*\*"#, 1, [.font: NSFont.boldSystemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
+                (#"__(.+?)__"#, 1, [.font: NSFont.boldSystemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
+                (#"(?<!\*)\*([^*\n]+?)\*(?!\*)"#, 1, [.font: NSFont(descriptor: NSFont.systemFont(ofSize: 14).fontDescriptor.withSymbolicTraits(.italic), size: 14) ?? NSFont.systemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
+                (#"(?<!_)_([^_\n]+?)_(?!_)"#, 1, [.font: NSFont(descriptor: NSFont.systemFont(ofSize: 14).fontDescriptor.withSymbolicTraits(.italic), size: 14) ?? NSFont.systemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
+                (#"~~(.+?)~~"#, 1, [.strikethroughStyle: NSUnderlineStyle.single.rawValue], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
+                (#"`([^`\n]+?)`"#, 1, [.font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular), .backgroundColor: NSColor.controlBackgroundColor], [.foregroundColor: dimmed, .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]),
+                (#"(^#{1,6})\s+(.+)$"#, 2, [.font: NSFont.boldSystemFont(ofSize: 16), .foregroundColor: NSColor.systemBlue], [.foregroundColor: dimmed, .font: NSFont.boldSystemFont(ofSize: 16)]),
+            ]
+            
+            for config in configs {
+                guard let regex = try? NSRegularExpression(pattern: config.0) else { continue }
+                let contentGroup = config.1
+                let contentAttrs = config.2
+                let delimiterAttrs = config.3
+                
+                regex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+                    guard let match = match else { return }
+                    let contentRange = match.range(at: contentGroup)
+                    guard contentRange.location != NSNotFound, contentRange.length > 0 else { return }
+                    textStorage.addAttributes(contentAttrs, range: contentRange)
+                    textStorage.addAttributes(delimiterAttrs, range: match.range)
+                    textStorage.addAttributes(contentAttrs, range: contentRange)
+                }
             }
         }
     }
 }
 
-// MARK: - Note Editor (Obsidian-style markdown formatting + live preview)
+// MARK: - Note Editor (Obsidian-inspired: focus toolbar, slash commands, clean preview)
 struct NoteEditorView: View {
     @State var note: Note
     @Binding var showPreview: Bool
     var onDeleted: () -> Void = {}
     @EnvironmentObject var vault: VaultManager
     @StateObject private var editor = EditorController()
-
+    @State private var showToolbar = false
+    @State private var showSlashMenu = false
+    @State private var slashSearch = ""
+    @FocusState private var isEditorFocused: Bool
+    
+    private let slashCommands: [(String, String, NoteFormat?)] = [
+        ("Heading 1", "h1", .heading1),
+        ("Heading 2", "h2", .heading2),
+        ("Bold", "b", .bold),
+        ("Italic", "i", .italic),
+        ("Strikethrough", "s", .strikethrough),
+        ("Inline Code", "code", .inlineCode),
+        ("Quote", "quote", .quote),
+        ("Bullet List", "ul", .bullet),
+        ("Numbered List", "ol", .numbered),
+        ("Checkbox", "todo", .checkbox),
+        ("Code Block", "codeblock", .codeBlock),
+        ("Link", "link", .link),
+        ("Horizontal Rule", "hr", .horizontalRule),
+        ("Underline", "u", .underline),
+    ]
+    
     var body: some View {
         VStack(spacing: 0) {
+            // MARK: Header bar
             HStack(spacing: 12) {
-                TextField("Title", text: $note.title)
-                    .font(DesignSystem.font(22, weight: .light))
+                // Properties indicator
+                HStack(spacing: 6) {
+                    Image(systemName: "doc.text")
+                        .font(DesignSystem.font(10))
+                        .foregroundColor(vault.theme.textSecondary.opacity(0.5))
+                    Text("Note")
+                        .font(DesignSystem.font(10, weight: .medium))
+                        .foregroundColor(vault.theme.textSecondary.opacity(0.5))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(vault.theme.card.opacity(0.5))
+                .cornerRadius(DesignSystem.radiusChip())
+                
+                Spacer()
+                
+                // Title field
+                TextField("Untitled", text: $note.title)
+                    .font(DesignSystem.font(20, weight: .light))
                     .textFieldStyle(.plain)
                     .foregroundColor(vault.theme.textPrimary)
                     .onChange(of: note.title) { _, _ in saveNote() }
-
+                
                 Spacer()
-
-                Button(action: { showPreview.toggle() }) {
-                    Image(systemName: showPreview ? "square.and.pencil" : "eye")
-                        .font(DesignSystem.font(12))
+                
+                // Preview toggle
+                Button(action: { withAnimation(.easeInOut(duration: 0.15)) { showPreview.toggle() } }) {
+                    Image(systemName: showPreview ? "pencil" : "doc.text")
+                        .font(DesignSystem.font(13))
                         .foregroundColor(showPreview ? vault.theme.accent : vault.theme.textSecondary)
-                        .padding(6)
+                        .frame(width: 28, height: 28)
+                        .background(vault.theme.card)
+                        .cornerRadius(6)
                 }
                 .buttonStyle(.plain)
-                .help(showPreview ? "Back to editor" : "Preview rendered markdown")
-
-                Button(action: deleteNote) {
+                .help(showPreview ? "Edit (⌘E)" : "Preview (⌘E)")
+                .keyboardShortcut("e", modifiers: .command)
+                
+                // Share button - actual macOS share sheet
+                ShareLink(
+                    item: shareContent(),
+                    subject: Text(note.title.isEmpty ? "Untitled" : note.title),
+                    message: Text("Shared from Sumi Hub")
+                ) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(DesignSystem.font(13))
+                        .foregroundColor(vault.theme.textSecondary)
+                        .frame(width: 28, height: 28)
+                        .background(vault.theme.card)
+                        .cornerRadius(6)
+                }
+                .help("Share / Export (⌘⇧S)")
+                .keyboardShortcut("s", modifiers: [.command, .shift])
+                
+                // Delete
+                Button(action: { confirmDelete() }) {
                     Image(systemName: "trash")
-                        .font(DesignSystem.font(12))
+                        .font(DesignSystem.font(13))
                         .foregroundColor(vault.theme.seal)
+                        .frame(width: 28, height: 28)
+                        .background(vault.theme.card)
+                        .cornerRadius(6)
                 }
                 .buttonStyle(.plain)
-                .padding(.horizontal, 8)
-                .help("Delete note")
-
-                Text("Saved \(timeAgo)")
-                    .font(DesignSystem.font(10))
-                    .foregroundColor(vault.theme.textSecondary.opacity(0.6))
+                .help("Delete (⌘⌫)")
+                .keyboardShortcut(.delete, modifiers: .command)
             }
-            .padding(.horizontal, 32)
-            .padding(.vertical, 16)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    FormatButton(icon: "textformat.size", action: { editor.apply(.heading1) }, help: "Heading 1", shortcut: .command, key: "1")
-                    FormatButton(icon: "textformat.size.2", action: { editor.apply(.heading2) }, help: "Heading 2", shortcut: .command, key: "2")
-                    Divider().frame(height: 16)
-                    FormatButton(icon: "bold", action: { editor.apply(.bold) }, help: "Bold", shortcut: .command, key: "b")
-                    FormatButton(icon: "italic", action: { editor.apply(.italic) }, help: "Italic", shortcut: .command, key: "i")
-                    FormatButton(icon: "strikethrough", action: { editor.apply(.strikethrough) }, help: "Strikethrough")
-                    FormatButton(icon: "chevron.left.forwardslash.chevron.right", action: { editor.apply(.inlineCode) }, help: "Inline code", shortcut: .command, key: "e")
-                    FormatButton(icon: "quote.opening", action: { editor.apply(.quote) }, help: "Quote")
-                    Divider().frame(height: 16)
-                    FormatButton(icon: "list.bullet", action: { editor.apply(.bullet) }, help: "Bullet list")
-                    FormatButton(icon: "list.number", action: { editor.apply(.numbered) }, help: "Numbered list")
-                    FormatButton(icon: "checklist", action: { editor.apply(.checkbox) }, help: "Checkbox")
-                    Divider().frame(height: 16)
-                    FormatButton(icon: "chevron.left.forwardslash.chevron.right.square", action: { editor.apply(.codeBlock) }, help: "Code block")
-                    FormatButton(icon: "link", action: { editor.apply(.link) }, help: "Link", shortcut: .command, key: "k")
-                    FormatButton(icon: "minus", action: { editor.apply(.horizontalRule) }, help: "Horizontal rule")
-                }
-                .padding(.horizontal, 32)
-                .padding(.vertical, 6)
-            }
-
+            .padding(.horizontal, 24)
+            .padding(.vertical, 14)
+            .background(vault.theme.background)
+            
             Divider().background(vault.theme.divider)
-
+            
+            // MARK: Focus-aware toolbar (appears on hover/focus)
+            if showToolbar || isEditorFocused {
+                ToolbarView(editor: editor)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            
+            Divider().background(vault.theme.divider)
+            
+            // MARK: Editor / Preview
             if showPreview {
-                ScrollView {
-                    MarkdownPreview(content: note.content)
-                        .padding(32)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(vault.theme.background)
-                }
+                PreviewView(content: note.content, vault: vault)
             } else {
-                MarkdownEditorView(
-                    text: $note.content,
-                    controller: editor,
-                    textColor: NSColor(vault.theme.textPrimary),
-                    selectionColor: NSColor(vault.theme.accent.opacity(0.35))
-                )
-                .padding(24)
-                .background(ZStack {
-                    vault.theme.background
-                    GridPatternView()
-                })
-                .onChange(of: note.content) { _, _ in saveNote() }
+                ZStack(alignment: .topLeading) {
+                    MarkdownEditorView(
+                        text: $note.content,
+                        controller: editor,
+                        textColor: NSColor(vault.theme.textPrimary),
+                        selectionColor: NSColor(vault.theme.accent.opacity(0.35))
+                    )
+                    .focused($isEditorFocused)
+                    .padding(24)
+                    .background(ZStack {
+                        vault.theme.background
+                        GridPatternView()
+                    })
+                    .onChange(of: note.content) { _, _ in saveNote() }
+                    .onKeyPress("/") {
+                        if note.content.hasSuffix("\n") || note.content.isEmpty {
+                            showSlashMenu = true
+                        }
+                        return .ignored
+                    }
+                    
+                    // Slash command menu
+                    if showSlashMenu {
+                        SlashMenuView(
+                            search: $slashSearch,
+                            commands: filteredCommands,
+                            onSelect: { format in
+                                editor.apply(format)
+                                showSlashMenu = false
+                                slashSearch = ""
+                            },
+                            onDismiss: { showSlashMenu = false; slashSearch = "" }
+                        )
+                        .offset(y: 40)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
             }
         }
         .background(vault.theme.background)
+        .onHover { showToolbar = $0 }
+        .animation(.easeInOut(duration: 0.12), value: showToolbar)
+        .animation(.easeInOut(duration: 0.12), value: showSlashMenu)
+        .animation(.easeInOut(duration: 0.15), value: showPreview)
     }
-
-    var timeAgo: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: note.date, relativeTo: Date())
+    
+    private func shareContent() -> String {
+        let md = "---\ntitle: \"\(note.title)\"\ndate: \(ISO8601DateFormatter().string(from: note.date))\n---\n\n\(note.content)"
+        return md
     }
-
-    func saveNote() {
+    
+    private func confirmDelete() {
+        let alert = NSAlert()
+        alert.messageText = "Delete Note"
+        alert.informativeText = "Are you sure you want to delete \"\(note.title.isEmpty ? "Untitled" : note.title)\"?"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Delete")
+        alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn {
+            deleteNote()
+        }
+    }
+    
+    private func saveNote() {
         note.date = Date()
         if let index = vault.notes.firstIndex(where: { $0.id == note.id }) {
             vault.notes[index] = note
             vault.saveAllData()
         }
     }
-
-    func deleteNote() {
+    
+    private func deleteNote() {
         vault.notes.removeAll { $0.id == note.id }
         vault.saveAllData()
         onDeleted()
+    }
+    
+    var timeAgo: String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: note.date, relativeTo: Date())
+    }
+    
+    var filteredCommands: [(String, String, NoteFormat?)] {
+        if slashSearch.isEmpty { return slashCommands }
+        return slashCommands.filter { $0.0.localizedCaseInsensitiveContains(slashSearch) || $0.1.localizedCaseInsensitiveContains(slashSearch) }
+    }
+}
+
+// MARK: - Subviews
+
+private struct ToolbarView: View {
+    @ObservedObject var editor: EditorController
+    @EnvironmentObject var vault: VaultManager
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                FormatButton(icon: "textformat.size", action: { editor.apply(.heading1) }, help: "Heading 1 (⌘1)", shortcut: .command, key: "1", label: "H1")
+                FormatButton(icon: "textformat.size.2", action: { editor.apply(.heading2) }, help: "Heading 2 (⌘2)", shortcut: .command, key: "2", label: "H2")
+                Divider().frame(height: 20)
+                FormatButton(icon: "bold", action: { editor.apply(.bold) }, help: "Bold (⌘B)", shortcut: .command, key: "b", label: "Bold")
+                FormatButton(icon: "italic", action: { editor.apply(.italic) }, help: "Italic (⌘I)", shortcut: .command, key: "i", label: "Italic")
+                FormatButton(icon: "strikethrough", action: { editor.apply(.strikethrough) }, help: "Strikethrough", label: "Strike")
+                FormatButton(icon: "text.underline", action: { editor.apply(.underline) }, help: "Underline (⌘U)", shortcut: .command, key: "u", label: "Under")
+                Divider().frame(height: 20)
+                FormatButton(icon: "chevron.left.forwardslash.chevron.right", action: { editor.apply(.inlineCode) }, help: "Inline Code (⌘E)", shortcut: .command, key: "e", label: "Code")
+                FormatButton(icon: "quote.opening", action: { editor.apply(.quote) }, help: "Quote", label: "Quote")
+                Divider().frame(height: 20)
+                FormatButton(icon: "list.bullet", action: { editor.apply(.bullet) }, help: "Bullet List", label: "• List")
+                FormatButton(icon: "list.number", action: { editor.apply(.numbered) }, help: "Numbered List", label: "1. List")
+                FormatButton(icon: "checklist", action: { editor.apply(.checkbox) }, help: "Checkbox", label: "☑ Todo")
+                Divider().frame(height: 20)
+                FormatButton(icon: "curlybraces", action: { editor.apply(.codeBlock) }, help: "Code Block", label: "Code")
+                FormatButton(icon: "link", action: { editor.apply(.link) }, help: "Link (⌘K)", shortcut: .command, key: "k", label: "Link")
+                FormatButton(icon: "minus", action: { editor.apply(.horizontalRule) }, help: "Divider", label: "—")
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 8)
+        }
+        .background(vault.theme.background)
+    }
+}
+
+private struct SlashMenuView: View {
+    @Binding var search: String
+    let commands: [(String, String, NoteFormat?)]
+    let onSelect: (NoteFormat) -> Void
+    let onDismiss: () -> Void
+    @FocusState private var isSearchFocused: Bool
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "slash.circle")
+                    .font(DesignSystem.font(13))
+                    .foregroundColor(.secondary)
+                TextField("Search commands...", text: $search)
+                    .textFieldStyle(.plain)
+                    .font(DesignSystem.font(13))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            Divider()
+            
+            ScrollView {
+                LazyVStack(spacing: 2) {
+                    ForEach(commands, id: \.0) { cmd in
+                        Button(action: { onSelect(cmd.2 ?? .bold) }) {
+                            HStack(spacing: 12) {
+                                Text("/\(cmd.1)")
+                                    .font(.system(size: 12, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 80, alignment: .leading)
+                                Text(cmd.0)
+                                    .font(DesignSystem.font(13))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .background(Color(NSColor.controlBackgroundColor))
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+            .frame(maxHeight: 280)
+        }
+        .background(Color(NSColor.windowBackgroundColor))
+        .cornerRadius(10)
+        .shadow(radius: 12)
+        .frame(width: 360)
+    }
+}
+
+private struct PreviewView: View {
+    let content: String
+    let vault: VaultManager
+    
+    var body: some View {
+        ScrollView {
+            MarkdownPreview(content: content)
+                .padding(32)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(vault.theme.background)
+        }
+        .background(vault.theme.background)
     }
 }
 
@@ -3313,19 +3589,29 @@ struct FormatButton: View {
     var help: String = ""
     var shortcut: EventModifiers? = nil
     var key: KeyEquivalent = "."
+    var label: String? = nil
     @EnvironmentObject var vault: VaultManager
     
     var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(DesignSystem.font(11))
-                .foregroundColor(vault.theme.textSecondary)
-                .padding(6)
-                .contentShape(Rectangle())
+        VStack(spacing: 2) {
+            Button(action: action) {
+                Image(systemName: icon)
+                    .font(DesignSystem.font(11))
+                    .foregroundColor(vault.theme.textSecondary)
+                    .padding(6)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(help)
+            .modifier(ShortcutModifier(shortcut: shortcut, key: key))
+            if let label {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(vault.theme.textSecondary.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .fixedSize()
+            }
         }
-        .buttonStyle(.plain)
-        .help(help)
-        .modifier(ShortcutModifier(shortcut: shortcut, key: key))
     }
 }
 
