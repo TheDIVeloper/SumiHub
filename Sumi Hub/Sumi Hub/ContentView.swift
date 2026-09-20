@@ -3120,12 +3120,14 @@ struct MarkdownEditorView: NSViewRepresentable {
     let controller: EditorController
     let textColor: NSColor
     let selectionColor: NSColor
+    let accentColor: NSColor
     
-    init(text: Binding<String>, controller: EditorController, textColor: NSColor, selectionColor: NSColor) {
+    init(text: Binding<String>, controller: EditorController, textColor: NSColor, selectionColor: NSColor, accentColor: NSColor) {
         self._text = text
         self.controller = controller
         self.textColor = textColor
         self.selectionColor = selectionColor
+        self.accentColor = accentColor
     }
     
     func makeCoordinator() -> Coordinator {
@@ -3212,8 +3214,8 @@ struct MarkdownEditorView: NSViewRepresentable {
                 let delimiterAttrs: [NSAttributedString.Key: Any]
             }
             
-            let baseFont = NSFont.systemFont(ofSize: 14)
             let dimmed = dimmedColor
+            let headingColor = parent.accentColor
             
             let configs: [(String, Int, [NSAttributedString.Key: Any], [NSAttributedString.Key: Any])] = [
                 (#"\*\*(.+?)\*\*"#, 1, [.font: NSFont.boldSystemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
@@ -3222,7 +3224,7 @@ struct MarkdownEditorView: NSViewRepresentable {
                 (#"(?<!_)_([^_\n]+?)_(?!_)"#, 1, [.font: NSFont(descriptor: NSFont.systemFont(ofSize: 14).fontDescriptor.withSymbolicTraits(.italic), size: 14) ?? NSFont.systemFont(ofSize: 14)], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
                 (#"~~(.+?)~~"#, 1, [.strikethroughStyle: NSUnderlineStyle.single.rawValue], [.foregroundColor: dimmed, .font: NSFont.systemFont(ofSize: 14)]),
                 (#"`([^`\n]+?)`"#, 1, [.font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular), .backgroundColor: NSColor.controlBackgroundColor], [.foregroundColor: dimmed, .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]),
-                (#"(^#{1,6})\s+(.+)$"#, 2, [.font: NSFont.boldSystemFont(ofSize: 16), .foregroundColor: NSColor.systemBlue], [.foregroundColor: dimmed, .font: NSFont.boldSystemFont(ofSize: 16)]),
+                (#"(^#{1,6})\s+(.+)$"#, 2, [.font: NSFont.boldSystemFont(ofSize: 16), .foregroundColor: headingColor], [.foregroundColor: dimmed, .font: NSFont.boldSystemFont(ofSize: 16)]),
             ]
             
             for config in configs {
@@ -3367,7 +3369,8 @@ struct NoteEditorView: View {
                         text: $note.content,
                         controller: editor,
                         textColor: NSColor(vault.theme.textPrimary),
-                        selectionColor: NSColor(vault.theme.accent.opacity(0.35))
+                        selectionColor: NSColor(vault.theme.accent.opacity(0.35)),
+                        accentColor: NSColor(vault.theme.accent)
                     )
                     .focused($isEditorFocused)
                     .padding(24)
